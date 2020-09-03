@@ -1,0 +1,44 @@
+{
+	"meta": {
+		"name": "3dport",
+		"game": "3D Renderer",
+		"author": "BOT Dan",
+		"description": "Basic 3D renderer (using gamebase due to scaling issues(?))",
+		"width": 1280,
+		"height": 720,
+		"gamebase_drawcursor": 1
+	},
+	"scripts": {
+		"gamebase_main": "main.js",
+		"gamebase_base": "gamebase/base.js",
+		"gamebase_hooks": "gamebase/hooks.js",
+		"gamebase_text": "gamebase/text.js",
+		"gamebase_ui": "gamebase/ui.js",
+		"gamebase_console": "gamebase/console.js",
+		"gamebase_ui_base": "gamebase/ui/base.js",
+		"gamebase_ui_button": "gamebase/ui/button.js",
+		"gamebase_ui_entry": "gamebase/ui/entry.js",
+		"gamebase_ui_numentry": "gamebase/ui/numentry.js",
+		"gamebase_ui_topmost": "gamebase/ui/topmost.js",
+		"gamebase_ui_dropdown": "gamebase/ui/dropdown.js",
+		"gamebase_ui_scroll": "gamebase/ui/scroll.js",
+		"gamebase_ui_text": "gamebase/ui/text.js",
+		"gamebase_ui_checkbox": "gamebase/ui/checkbox.js",
+		"1_matrix": "custom/matrix.js",
+		"1_vector": "custom/vector.js",
+		"main": "custom/main.js"
+	},
+	"textures": {
+		"font_mplus1m_light": "gamebase/fonts/font_mplus1m_light.png",
+		"font_mplus1m_thin": "gamebase/fonts/font_mplus1m_thin.png",
+		"font_mplus1m": "gamebase/fonts/font_mplus1m.png",
+		"font_mplus1m_semibold": "gamebase/fonts/font_mplus1m_semibold.png",
+		"font_mplus1m_bold": "gamebase/fonts/font_mplus1m_bold.png",
+		"cursor_pointer": "gamebase/textures/cursor_pointer.png",
+		"cursor_clicker": "gamebase/textures/cursor_clicker.png",
+		"cursor_text": "gamebase/textures/cursor_text.png"
+	},
+	"sounds": {
+
+	}
+}
