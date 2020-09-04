@@ -91,6 +91,17 @@ class Vector {
     }
 
     /**
+     * Returns this vector as a translation matrix
+     */
+    getTranslationMatrix() {
+        const matrix = Matrix.transformationMatrix();
+        matrix[3][0] = this.x;
+        matrix[3][1] = this.y;
+        matrix[3][2] = this.z;
+        return matrix;
+    }
+
+    /**
      * Returns a string version of this vector
      */
     toString() {

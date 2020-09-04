@@ -1,21 +1,28 @@
-// Write your game code here
-
-/*
-GameBase.Hooks.Add( "think", "test_think_hook", function( time ) {
-	print("time");
-});
-*/
-
 const VERTS = [];
 const steps = 100;
 for (let i=0; i<steps; i++) {
     const a = i / steps-1;
     const x = Math.sin(2 * Math.PI * a) * 20;
     const y = Math.cos(2 * Math.PI * a) * 20;
-    VERTS.push(new Vector(x, y, 50+i*0));
+    VERTS.push(new Vector(x, y, 50+i*0.5));
 }
 
-const camPos = new Vector(0, 0, 0);
+const floorSize = 30;
+const floorSteps = 20;
+for (let i=0; i<floorSteps; i++) {
+    for (let j=0; j<floorSteps; j++) {
+        VERTS.push(new Vector(
+            -floorSize/2 + floorSize * (i/floorSteps),
+            -5,
+            -floorSize/2 + floorSize * (j/floorSteps),));
+    }
+}
+
+let camPos = new Vector(0, 0, 0);
+let camAngle = new Angle(0, 0, 0);
+
+let dragging = false;
+let altDragging = false;
 
 function gluPerspective(angleOfView, imageAspectRatio, near, far) {
     const scale = Math.tan(angleOfView * 0.5 * Math.PI / 180) * near;
@@ -55,11 +62,9 @@ function glFrustrum(points, near, far) {
 function drawIt() {
     const imageWidth = _m.width;
     const imageHeight = _m.height;
-    //const Mproj = new Matrix();
-    const worldToCamera = Matrix.transformationMatrix();
-    worldToCamera[3][0] = camPos.x;
-    worldToCamera[3][1] = camPos.y;
-    worldToCamera[3][2] = camPos.z;
+    const translation = camPos.getTranslationMatrix()
+    const rotation = camAngle.getRotationMatrix();
+    const worldToCamera = translation.multiply(rotation);
 
     const angleOfView = 90;
     const near = 0.1;
@@ -73,6 +78,7 @@ function drawIt() {
         const vert = VERTS[id];
         const vertCamera = vert.multiplyMatrix(worldToCamera);
         const projectedVert = vertCamera.multiplyMatrix(Mproj);
+        if (projectedVert.z > 1) { continue; }
         // This should now be see-able
         const screenX = (projectedVert.x + 1) * 0.5 * imageWidth;
         const screenY = (1 - (projectedVert.y + 1) * 0.5) * imageHeight;
@@ -81,7 +87,7 @@ function drawIt() {
     }
 }
 
-GameBase.Hooks.Add( "Draw", "test_think_hook", () => {
+GameBase.Hooks.Add("Draw", "test_think_hook", () => {
     _r.color(1, 1, 1, 1);
     const w = _m.width;
     const h = _m.height;
@@ -89,19 +95,48 @@ GameBase.Hooks.Add( "Draw", "test_think_hook", () => {
     drawIt()
 });
 
-GameBase.Hooks.Add( "OnKeyPressed", "test_key_hook", (keycode) => {
-    switch (keycode) {
-        case 26:
-            camPos.y += 10;
-            break;
-        case 22:
-            camPos.y -= 10;
-            break;
-        case 4:
-            camPos.x -= 10;
-            break;
-        case 7:
-            camPos.x += 10;
-            break;
+GameBase.Hooks.Add("Think", "test_key_hook", (keycode) => {
+    let forward = 0;
+    let right = 0;
+    let up = 0;
+    let speed = 0.1;
+
+    if (GameBase.IsKeyDown("W")) { forward += 1; };
+    if (GameBase.IsKeyDown("S")) { forward -= 1; };
+    if (GameBase.IsKeyDown("A")) { right -= 1; };
+    if (GameBase.IsKeyDown("D")) { right += 1; };
+    if (GameBase.IsKeyDown("SPACEBAR")) { up += 1; }
+    if (GameBase.IsKeyDown("LEFT_CONTROL")) { up -= 1; }
+    if (GameBase.IsKeyDown("LEFT_SHIFT")) { speed = 0.5; };
+
+    const lookDir = camAngle.getForward();
+    const rightDir = camAngle.getRight();
+    const upDir = camAngle.getUp();
+
+    camPos = camPos.add(lookDir.multiply(forward * speed));
+    camPos = camPos.add(rightDir.multiply(right * speed));
+    camPos = camPos.add(upDir.multiply(up * speed));
+});
+
+GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
+    print(GameBase.GetKey(keycode));
+});
+
+GameBase.Hooks.Add("OnMousePressed", "h", () => {
+    dragging = true;
+})
+
+GameBase.Hooks.Add("OnMouseReleased", "h", () => {
+    dragging = false;
+})
+
+GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) => {
+    if (dragging) {
+        if (GameBase.IsKeyDown("LEFT_ALT")) {
+            camAngle.roll += dx*0.001;
+        } else {
+            camAngle.pitch -= dx*0.001;
+            camAngle.yaw -= dy*0.001;
+        }
     }
 });

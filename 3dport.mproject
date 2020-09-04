@@ -26,6 +26,7 @@
 		"gamebase_ui_checkbox": "gamebase/ui/checkbox.js",
 		"1_matrix": "custom/matrix.js",
 		"1_vector": "custom/vector.js",
+		"1_angle": "custom/angle.js",
 		"main": "custom/main.js"
 	},
 	"textures": {

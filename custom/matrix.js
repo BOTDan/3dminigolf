@@ -1,19 +1,57 @@
 class Matrix extends Array {
     /**
      * Creates a new Matrix with given w and h
-     * @param {Integer} w The width of the matrix
      * @param {Integer} h The height of the matrix
+     * @param {Integer} w The width of the matrix
      */
-    constructor(w, h) {
+    constructor(h, w) {
         super();
-        w = w || 4;
-        h = h || w;
-        for (let i=0; i<w; i++) {
+        h = h || 4;
+        w = w || h;
+        for (let i=0; i<h; i++) {
             this.push([]);
-            for (let j=0; j<h; j++) {
+            for (let j=0; j<w; j++) {
                 this[i].push(0);
             }
         }
+    }
+
+    /**
+     * Multiplies 2 matrices and returns a new matrix
+     * @param {Matrix} matrix The matrix to multiply by
+     */
+    multiply(matrix) {
+        if (this.length !== matrix[0].length) { return; }
+        const out = new Matrix(this.length, matrix[0].length);
+        for (let y=0; y<this.length; y++) {
+            for (let x=0; x<matrix[0].length; x++) {
+                let product = 0;
+                for (let i=0; i<this[y].length; i++) {
+                    product += this[y][i] * matrix[i][x];
+                }
+                out[y][x] = product;
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Creates a copy of this matrix with the given h and w
+     * @param {Integer} h The height of the matrix
+     * @param {Integer} w The width of the matrix
+     */
+    resize(h, w) {
+        const out = new Matrix(h, w);
+        for (let i=0; i<h; i++) {
+            for (let j=0; j<w; j++) {
+                if (this[i] !== undefined && this[i][j] !== undefined) {
+                    out[i][j] = this[i][j];
+                } else {
+                    out[i][j] = 0;
+                }
+            }
+        }
+        return out;
     }
 
     /**
@@ -27,3 +65,14 @@ class Matrix extends Array {
         return matrix;
     }
 }
+
+const test_a = new Matrix(2, 3);
+test_a[0] = [1, 2, 3];
+test_a[1] = [4, 5, 6];
+
+const test_b = new Matrix(3, 2);
+test_b[0] = [10, 11];
+test_b[1] = [20, 21];
+test_b[2] = [30, 31];
+
+const final = test_a.multiply(test_b);
