@@ -20,6 +20,7 @@ for (let i=0; i<floorSteps; i++) {
 
 let camPos = new Vector(0, 0, 0);
 let camAngle = new Angle(0, 0, 0);
+let camFov = 90;
 
 let dragging = false;
 let altDragging = false;
@@ -66,9 +67,9 @@ function drawIt() {
     const rotation = camAngle.getRotationMatrix();
     const worldToCamera = translation.multiply(rotation);
 
-    const angleOfView = 90;
+    const angleOfView = camFov;
     const near = 0.1;
-    const far = 100;
+    const far = 1000;
     const imageAspectRatio = imageWidth / imageHeight;
 
     const points = gluPerspective(angleOfView, imageAspectRatio, near, far);
@@ -120,6 +121,10 @@ GameBase.Hooks.Add("Think", "test_key_hook", (keycode) => {
 
 GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
     print(GameBase.GetKey(keycode));
+    if (GameBase.GetKey(keycode) === "TAB") {
+        camFov = 90;
+        camAngle.roll = 0;
+    }
 });
 
 GameBase.Hooks.Add("OnMousePressed", "h", () => {
@@ -133,7 +138,8 @@ GameBase.Hooks.Add("OnMouseReleased", "h", () => {
 GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) => {
     if (dragging) {
         if (GameBase.IsKeyDown("LEFT_ALT")) {
-            camAngle.roll += dx*0.001;
+            camAngle.roll -= dx*0.001;
+            camFov += dy*0.1;
         } else {
             camAngle.pitch -= dx*0.001;
             camAngle.yaw -= dy*0.001;

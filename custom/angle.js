@@ -38,9 +38,7 @@ class Angle {
      */
     getForward() {
         const out = new Vector();
-        // out.x = Math.cos(this.yaw) * Math.cos(this.pitch);
-        // out.y = Math.sin(this.yaw) * Math.cos(this.pitch);
-        out.x = Math.sin(this.pitch);
+        out.x = Math.sin(this.pitch) * Math.cos(this.yaw);
         out.y = - Math.sin(this.yaw);
         out.z = Math.cos(this.yaw) * Math.cos(this.pitch);
         return out;
