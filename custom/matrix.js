@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @classdesc A matrix
+ */
 class Matrix extends Array {
     /**
      * Creates a new Matrix with given w and h
