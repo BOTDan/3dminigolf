@@ -65,14 +65,3 @@ class Matrix extends Array {
         return matrix;
     }
 }
-
-const test_a = new Matrix(2, 3);
-test_a[0] = [1, 2, 3];
-test_a[1] = [4, 5, 6];
-
-const test_b = new Matrix(3, 2);
-test_b[0] = [10, 11];
-test_b[1] = [20, 21];
-test_b[2] = [30, 31];
-
-const final = test_a.multiply(test_b);
