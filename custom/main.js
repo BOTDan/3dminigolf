@@ -1,22 +1,39 @@
-const VERTS = [];
-const steps = 100;
-for (let i=0; i<steps; i++) {
-    const a = i / steps-1;
-    const x = Math.sin(2 * Math.PI * a) * 20;
-    const y = Math.cos(2 * Math.PI * a) * 20;
-    VERTS.push(new Vector(x, y, 50+i*0.5));
-}
+let VERTS = [];
+let MODELS = [];
+MODELS.push(makeTestModel());
 
-const floorSize = 30;
-const floorSteps = 20;
-for (let i=0; i<floorSteps; i++) {
-    for (let j=0; j<floorSteps; j++) {
-        VERTS.push(new Vector(
-            -floorSize/2 + floorSize * (i/floorSteps),
-            -5,
-            -floorSize/2 + floorSize * (j/floorSteps),));
+let spiralSteps = 100;
+let floorSize = 50;
+let floorSteps = 50;
+
+function generateTestVerts() {
+    VERTS = [];
+    for (let i=0; i<spiralSteps; i++) {
+        const a = i / spiralSteps-1;
+        const x = Math.sin(2 * Math.PI * a) * 20;
+        const y = Math.cos(2 * Math.PI * a) * 20;
+        VERTS.push(new Vector(x, y, 50+i*0.5));
+    }
+    for (let i=0; i<floorSteps; i++) {
+        for (let j=0; j<floorSteps; j++) {
+            VERTS.push(new Vector(
+                -floorSize/2 + floorSize * (i/floorSteps),
+                -5,
+                -floorSize/2 + floorSize * (j/floorSteps),));
+        }
     }
 }
+generateTestVerts();
+GameBase.Console.AddCommand("setspace", (size, steps) => {
+    if (size === undefined) {
+        GameBase.Console.AttemptCommand("help", "setspace");
+        return;
+    }
+    floorSize = size || floorSize;
+    floorSteps = steps || floorSteps;
+    generateTestVerts();
+    GameBase.Console.Log(`Floor set to ${size}x${size} uits, with ${steps}x${steps} vertices`)
+}, "setspace [size] [density] (default 60, 50)");
 
 let camPos = new Vector(0, 0, 0);
 let camAngle = new Angle(0, 0, 0);
@@ -25,30 +42,30 @@ let camFov = 90;
 let dragging = false;
 let altDragging = false;
 
-function gluPerspective(angleOfView, imageAspectRatio, near, far) {
-    const scale = Math.tan(angleOfView * 0.5 * Math.PI / 180) * near;
-    const r = imageAspectRatio * scale;
+function getPerspective(fov, aspect, near, far) {
+    const scale = Math.tan(fov * 0.5 * Math.PI / 180) * near;
+    const r = aspect * scale;
     const l = -r;
     const t = scale;
     const b = -t;
-    return { t, l, b, r };
+    return { top: t, left: l, bottom: b, right: r };
 }
 
-function glFrustrum(points, near, far) {
+function getViewFustrum(points, near, far) {
     const matrix = new Matrix(4, 4);
 
-    matrix[0][0] = 2 * near / (points.r - points.l);
+    matrix[0][0] = 2 * near / (points.right - points.left);
     matrix[0][1] = 0;
     matrix[0][2] = 0;
     matrix[0][3] = 0;
 
     matrix[1][0] = 0;
-    matrix[1][1] = 2 * near / (points.t - points.b);
+    matrix[1][1] = 2 * near / (points.top - points.bottom);
     matrix[1][2] = 0;
     matrix[1][3] = 0;
 
-    matrix[2][0] = (points.r + points.l) / (points.r - points.l);
-    matrix[2][1] = (points.t + points.b) / (points.t - points.b);
+    matrix[2][0] = (points.right + points.left) / (points.right - points.left);
+    matrix[2][1] = (points.top + points.bottom) / (points.top - points.bottom);
     matrix[2][2] = -(far + near) / (far - near);
     matrix[2][3] = -1;
 
@@ -56,6 +73,32 @@ function glFrustrum(points, near, far) {
     matrix[3][1] = 0;
     matrix[3][2] = -2 * far * near / (far - near);
     matrix[3][3] = 0;
+
+    return matrix;
+}
+
+function getViewOrtho(points, near, far) {
+    const matrix = new Matrix(4, 4);
+
+    matrix[0][0] = 2 / (points.right - points.left);
+    matrix[0][1] = 0;
+    matrix[0][2] = 0;
+    matrix[0][3] = -(points.right + points.left) / (points.right - points.left);
+
+    matrix[1][0] = 0;
+    matrix[1][1] = 2 / (points.top - points.bottom);
+    matrix[1][2] = 0;
+    matrix[1][3] = -(points.top + points.bottom) / (points.top - points.bottom);
+
+    matrix[2][0] = 0;
+    matrix[2][1] = 0;
+    matrix[2][2] = -2 / (far - near);
+    matrix[2][3] = -(far + near) / (far - near);
+
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = 1;
 
     return matrix;
 }
@@ -72,13 +115,13 @@ function drawIt() {
     const far = 1000;
     const imageAspectRatio = imageWidth / imageHeight;
 
-    const points = gluPerspective(angleOfView, imageAspectRatio, near, far);
-    const Mproj = glFrustrum(points, near, far);
+    const points = getPerspective(angleOfView, imageAspectRatio, near, far);
+    const projection = getViewFustrum(points, near, far);
 
     for (const id in VERTS) {
         const vert = VERTS[id];
         const vertCamera = vert.multiplyMatrix(worldToCamera);
-        const projectedVert = vertCamera.multiplyMatrix(Mproj);
+        const projectedVert = vertCamera.multiplyMatrix(projection);
         if (projectedVert.z > 1) { continue; }
         // This should now be see-able
         const screenX = (projectedVert.x + 1) * 0.5 * imageWidth;
@@ -86,6 +129,23 @@ function drawIt() {
         _r.color(id/VERTS.length, 0, 0, 1);
         _r.sprite(screenX, screenY, 5, 5);
     }
+
+    _r.layer++;
+    for (const model of MODELS) {
+        model.transform(worldToCamera, projection);
+        model.draw(imageWidth, imageHeight);
+    }
+}
+
+let lastTime = new Date().getTime();
+function drawFPS() {
+    const curTime = new Date().getTime();
+    const fps = 1/((curTime - lastTime)/1000);
+    _r.color(0, 1, 0, 1);
+    GameBase.Text.SetFont("Mplus1m Bold");
+    GameBase.Text.SetSize(30);
+    GameBase.Text.DrawText(0, 0, `${Math.floor(fps)}FPS | ${VERTS.length} Vertices`);
+    lastTime = curTime;
 }
 
 GameBase.Hooks.Add("Draw", "test_think_hook", () => {
@@ -93,7 +153,8 @@ GameBase.Hooks.Add("Draw", "test_think_hook", () => {
     const w = _m.width;
     const h = _m.height;
     _r.sprite(w/2, h/2, w-2, h-2);
-    drawIt()
+    drawIt();
+    drawFPS();
 });
 
 GameBase.Hooks.Add("Think", "test_key_hook", (keycode) => {
@@ -141,8 +202,8 @@ GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) =>
             camAngle.roll -= dx*0.001;
             camFov += dy*0.1;
         } else {
-            camAngle.pitch -= dx*0.001;
-            camAngle.yaw -= dy*0.001;
+            camAngle.pitch -= dx*0.002;
+            camAngle.yaw -= dy*0.002;
         }
     }
 });
