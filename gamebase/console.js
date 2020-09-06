@@ -89,6 +89,7 @@ GameBase.Console.OpenConsole = function() {
 	this.UI.TextBox.SetSize( this.UI.GetWidth(), 50 );
 	this.UI.TextBox.TextColour = [1,1,1,1];
 	this.UI.TextBox.TextSize = 30;
+	this.UI.TextBox.SetFocused();
 	this.UI.TextBox.Draw = function() {
 		var w = this.GetWidth();
 		var h = this.GetHeight();
