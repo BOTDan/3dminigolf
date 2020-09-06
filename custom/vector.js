@@ -102,6 +102,17 @@ class Vector {
     }
 
     /**
+     * Returns this vector as a scale matrix
+     */
+    getScaleMatrix() {
+        const matrix = Matrix.transformationMatrix();
+        matrix[0][0] = this.x;
+        matrix[1][1] = this.y;
+        matrix[2][2] = this.z;
+        return matrix;
+    }
+
+    /**
      * Returns a string version of this vector
      */
     toString() {
@@ -118,7 +129,7 @@ class Vector {
         out.y = this.x * matrix[0][1] + this.y * matrix[1][1] + this.z * matrix[2][1] + matrix[3][1];
         out.z = this.x * matrix[0][2] + this.y * matrix[1][2] + this.z * matrix[2][2] + matrix[3][2];
         const w = this.x * matrix[0][3] + this.y * matrix[1][3] + this.z * matrix[2][3] + matrix[3][3];
-        if (w !== 1) {
+        if (w !== 1 && w !== 0) {
             out.x /= w;
             out.y /= w;
             out.z /= w;
