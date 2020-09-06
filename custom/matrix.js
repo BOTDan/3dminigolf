@@ -59,6 +59,18 @@ class Matrix extends Array {
     }
 
     /**
+     * Returns the content of this matrix as a string for printing
+     */
+    toString() {
+        let out = "";
+        for (const row of this) {
+            if (out !== "") { out += ",\n" }
+            out += `[${row.join(", ")}]`;
+        }
+        return out;
+    }
+
+    /**
      * Creates a new, blank transformation matrix
      */
     static transformationMatrix() {
