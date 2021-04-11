@@ -1,10 +1,10 @@
 class Renderable {
-    constructor(position, rotation, scale) {
+    constructor(position, rotation, scale, polygons) {
         this.position = position || new Vector(0, 0, 0);
         this.rotation = rotation || new Angle(0, 0, 0);
         this.scale = scale || new Vector(1, 1, 1);
 
-        this.polygons = [];
+        this.polygons = polygons || [];
     }
 
     get position() { return this._position; }
@@ -22,22 +22,23 @@ class Renderable {
      * @param  {...any} matrices Any transformation matrices to apply
      */
     transform(...matrices) {
-        // First, apply local transformation
-        const localToWorld = this.getTransformationMatrix();
+        const finalPolys = [];
         for (const poly of this.polygons) {
-            poly.transform(localToWorld, ...matrices);
+            finalPolys.push(poly.transform(localToWorld, ...matrices));
         }
+        return finalPolys;
     }
 
     /**
-     * Draws the transformed version of this renderable to the screen
-     * @param {Integer} scrW The width of the screen in pixels
-     * @param {Integer} scrH The height of the screen in pixels
+     * Returns this renderable's polygons, translated to world coordinates
      */
-    draw(scrW, scrH) {
+    getWorldPolygons() {
+        const localToWorld = this.getTransformationMatrix();
+        const finalPolys = [];
         for (const poly of this.polygons) {
-            poly.draw(scrW, scrH);
+            finalPolys.push(poly.transform(localToWorld));
         }
+        return finalPolys;
     }
 
     /**

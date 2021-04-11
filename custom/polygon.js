@@ -2,20 +2,16 @@ class Polygon {
     /**
      * Creates a new polygon
      */
-    constructor() {
-        this.verts = [];
-        this.uvs = [];
+    constructor(verts, colour) {
+        this.verts = verts || [];
         this.texture = undefined;
-
-        this._transformedVerts = [];
+        this.colour = colour || [1,1,0,1];
     }
 
     get verts() {  return this._verts; }
-    get uvs() { return this._uvs; }
     get texture() { return this._texture; }
 
     set verts(value) { this._verts = value; }
-    set uvs(value) { this._uvs = value; }
     set texture(value) { this._texture = value; }
 
     /**
@@ -23,14 +19,15 @@ class Polygon {
      * @param  {...Matrix} matrices Any transformation matrices to apply
      */
     transform(...matrices) {
-        this.transformedVerts = [];
+        const finalVerts = [];
         for (const vert of this.verts) {
             let result = vert;
             for (const matrix of matrices) {
                 result = result.multiplyMatrix(matrix);
             }
-            this.transformedVerts.push(result);
+            finalVerts.push(result);
         }
+        return new Polygon(finalVerts, this.colour);
     }
 
     /**
@@ -43,7 +40,7 @@ class Polygon {
             const verts = [this.transformedVerts[0],
             this.transformedVerts[i+1],
             this.transformedVerts[i+2]];
-            const uvs = [this.uvs[0], this.uvs[i+1], this.uvs[i+2]];
+            const uvs = [[0,0], [1,0], [1,1]];
 
             const finalVerts = [];
             for (const vert of verts) {
@@ -52,7 +49,7 @@ class Polygon {
                 finalVerts.push([screenX, screenY]);
             }
             
-            _r.color(1, 1, 1, 1);
+            _r.color(0, 1, 1, 1);
             _r.quad(finalVerts[0][0], finalVerts[0][1], uvs[0][0], uvs[0][1],
                 finalVerts[1][0], finalVerts[1][1], uvs[1][0], uvs[1][1],
                 finalVerts[2][0], finalVerts[2][1], uvs[2][0], uvs[2][1],
@@ -60,5 +57,9 @@ class Polygon {
                 this.texture
             );
         }
+    }
+
+    toString() {
+        return `[${this.verts.join(",")}]`;
     }
 }
