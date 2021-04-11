@@ -91,6 +91,40 @@ class Vector {
     }
 
     /**
+     * Returns the normalised version of this vector
+     */
+    normalize() {
+        const len = this.length();
+        return new Vector(
+            this.x / len,
+            this.y / len,
+            this.z / len
+        );
+    }
+
+    /**
+     * Returns the dot product between this vector and another
+     * @param {Vector} value The other vector
+     */
+    dot(value) {
+        return this.x * value.x + this.y * value.y + this.z * value.z;
+    }
+
+    /**
+     * Returns the squares length of this vector
+     */
+    lengthSqr() {
+        return this.x * this.x + this.y * this.y + this.z * this.z;
+    }
+
+    /**
+     * Returns the length of this vector
+     */
+    length() {
+        return Math.sqrt(this.lengthSqr());
+    }
+
+    /**
      * Returns this vector as a translation matrix
      */
     getTranslationMatrix() {
