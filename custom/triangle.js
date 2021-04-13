@@ -17,6 +17,8 @@ class Triangle {
     this.colour = colour || [1, 0, 0, 1];
     this.flipNormal = flipNormal || false;
 
+    this.worldVerts = [];
+
     this._clippedVerts = [];
     this._screenVerts = [];
 
