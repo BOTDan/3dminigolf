@@ -32,7 +32,11 @@
 		"1_model": "custom/model.js",
 		"1_draw": "custom/draw.js",
 		"2_plyparser": "custom/plyparser.js",
-		"main": "custom/game.js"
+		"1_model2": "custom/model2.js",
+		"1_face": "custom/face.js",
+		"1_triangle": "custom/triangle.js",
+		"1_util": "custom/util.js",
+		"main": "custom/dev.js"
 	},
 	"textures": {
 		"font_mplus1m_light": "gamebase/fonts/font_mplus1m_light.png",
