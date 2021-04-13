@@ -1,5 +1,4 @@
 const CAMERA = new Camera(new Vector(0, 0, -10));
-const POLYGONS = [];
 const MODELS = [];
 
 // const testPoly1 = new Polygon([
@@ -11,39 +10,59 @@ const MODELS = [];
 // testPoly1.flipNormal = true;
 
 const cube = Model2.Cube();
-const monkeyData = parsePLY(testData);
-const monkey = generateModel(monkeyData);
-monkey.rotation.pitch = 90;
-monkey.position.x = 10;
-monkey.calcColour = (tri) => {
-  const normal = util.findNormal(tri.worldVerts);
-  const amountUp = (1 + normal.y) / 2;
-  return [0, amountUp, 0, 1];
-};
+MODELS.push(cube);
 
+const monkeyData = parsePLY(testData);
+for (let i=0; i < 5; i++) {
+  const monkey = generateModel(monkeyData);
+  monkey.rotation.pitch = 90;
+  monkey.position.x = 5 + i * 3;
+  monkey.calcColour = (tri) => {
+    const normal = util.findNormal(tri.worldVerts);
+    const amountUp = (1 + normal.y) / 2;
+    return [0, amountUp, 0, 1];
+  };
+  MODELS.push(monkey);
+}
+
+let drawWireframe = false;
+GameBase.Console.AddCommand("outline", (bool) => {
+  if (isNaN(bool)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
+  }
+  const shouldDraw = parseInt(bool);
+  drawWireframe = (shouldDraw > 0);
+}, "test");
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   CAMERA.updateMatrix();
-  
-  // Get a list of every triangle
-  cube.update(CAMERA);
-  const tris = cube.triangulate();
-  tris.forEach((tri) => {
-    tri.clip(CAMERA);
-    tri.toScreen();
-    tri.draw();
-  });
 
-  monkey.update(CAMERA);
-  const tris2 = monkey.triangulate();
-  tris2.forEach((tri) => {
-    tri.clip(CAMERA);
-    tri.toScreen();
-    tri.draw();
-    tri.drawWireframe();
+  _r.color(1, 1, 1, 1);
+  _r.rect(0, 0, _m.width, _m.height);
+
+  // Extract all the triangles from their models
+  const triangles = [];
+  MODELS.forEach((model) => {
+    model.update(CAMERA);
+    triangles.push(...model.triangulate());
+  });
+  // Get the triangles readt to render
+  triangles.forEach((triangle) => {
+    triangle.clip(CAMERA);
+    triangle.toScreen();
+  });
+  // Do a depth-sort on the triangles to try make render depth accurate
+  triangles.sort((a, b) => b.zMin - a.zMin);
+  // Finally, draw the triangles
+  triangles.forEach((triangle) => {
+    triangle.draw();
+    if (drawWireframe) {
+      triangle.drawWireframe();
+    }
   });
   
   drawFPS();
+  drawTriangleCount(triangles.length);
 });
 
 let lastTime = new Date().getTime();
@@ -55,6 +74,13 @@ function drawFPS() {
   GameBase.Text.SetSize(30);
   GameBase.Text.DrawText(0, 0, `${Math.floor(fps)}FPS`);
   lastTime = curTime;
+}
+
+function drawTriangleCount(count) {
+  _r.color(0, 1, 0, 1);
+  GameBase.Text.SetFont("Mplus1m Bold");
+  GameBase.Text.SetSize(30);
+  GameBase.Text.DrawText(0, 30, `${count} Triangles`);
 }
 
 GameBase.Hooks.Add("Think", "test_key_hook", () => {
