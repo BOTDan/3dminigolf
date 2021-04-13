@@ -58,7 +58,7 @@ function parsePLY(fileContent) {
           const verts = [];
           const amount = parts[0];
           for (let j=0; j < amount; j++) {
-            verts.push(parsedData.vertex[parseInt(parts[1+j])]);
+            verts.push(parseInt(parts[1+j]));
           }
           parsedData[element.name].push(verts);
           break;
@@ -71,16 +71,12 @@ function parsePLY(fileContent) {
 }
 
 function generateModel(parsedData) {
-  const model = new Model();
-  parsedData.face.forEach(face => {
-    const poly = new Polygon(face);
-    poly.flipNormal = true;
-    poly.calcColour = function() {
-      const norm = this.calcNormal(this._worldVerts);
-      const amount = (1 + norm.dot(new Vector(0, -1, 0))) / 2;
-      return [amount, 0, 0, 1];
-    }
-    model.addPolygon(poly);
+  const model = new Model2();
+  model.verts = parsedData.vertex;
+  parsedData.face.forEach(verts => {
+    const face = new Face(verts);
+    face.flipNormal = true;
+    model.addFace(face);
   });
   return model;
 }
