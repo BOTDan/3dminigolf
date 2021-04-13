@@ -71,8 +71,9 @@ class Triangle {
    * @returns {Boolean}
    */
   shouldCull() {
-    const normal = util.findNormal(this.clippedVerts);
+    let normal = util.findNormal(this.clippedVerts);
     if (normal === null) { return true; }
+    if (this.flipNormal) { normal = normal.invert(); }
     const dot = new Vector(0, 0, -1).dot(normal);
     return (dot < 0);
   }
@@ -87,8 +88,8 @@ class Triangle {
   clipEdge(point1, point2, near=0) {
     const planePoint = new Vector(0, 0, near);
     const planeNormal = new Vector(0, 0, 1);
-    if (this.isPointOutside(point1)) {
-      if (this.isPointOutside(point2)) {
+    if (this.isPointOutsideZ(point1)) {
+      if (this.isPointOutsideZ(point2)) {
         // Both outside, useless
         return [];
       }
@@ -96,7 +97,7 @@ class Triangle {
       const point = util.getLineIntersection(point1, point2, planePoint, planeNormal);
       return [point];
     } else {
-      if (this.isPointOutside(point2)) {
+      if (this.isPointOutsideZ(point2)) {
         // Moving from inside to outside
         const point = util.getLineIntersection(point1, point2, planePoint, planeNormal);
         return [point1, point];
