@@ -145,8 +145,8 @@ class Model2 {
     model.addFace(top, bottom, front, back, left, right);
 
     model.think = function() {
-      this.rotation.pitch += 0.005;
-      this.rotation.yaw += 0.005;
+      this.rotation.pitch += 0.1;
+      this.rotation.yaw += 0.1;
     }
     return model;
   }
