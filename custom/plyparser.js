@@ -71,7 +71,7 @@ function parsePLY(fileContent) {
 }
 
 function generateModel(parsedData) {
-  const model = new Model2();
+  const model = new Model();
   model.verts = parsedData.vertex;
   parsedData.face.forEach(verts => {
     const face = new Face(verts);

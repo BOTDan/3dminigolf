@@ -9,7 +9,7 @@ const MODELS = [];
 // ]);
 // testPoly1.flipNormal = true;
 
-const cube = Model2.Cube();
+const cube = Model.Cube();
 MODELS.push(cube);
 
 const monkeyData = parsePLY(testData);
