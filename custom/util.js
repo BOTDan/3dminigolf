@@ -23,11 +23,29 @@ const util = {
    */
   findNormal(verts) {
     if (verts.length < 3) {
-        return null;
+      return null;
     }
     const a = verts[1].subtract(verts[0]);
     const b = verts[2].subtract(verts[0]);
     let dir = a.cross(b);
     return dir.normalize();
+  },
+
+  /**
+   * Converts radians to degrees
+   * @param {Number} rad Angle in radians
+   * @returns {Number} Angle in degrees
+   */
+  toDegrees(rad) {
+    return rad * (180 / Math.PI);
+  },
+
+  /**
+   * Canvers degrees to radians
+   * @param {Number} deg Angle in degrees
+   * @returns {Number} Angle in radians
+   */
+  toRadians(deg) {
+    return deg * (Math.PI / 180);
   }
 }

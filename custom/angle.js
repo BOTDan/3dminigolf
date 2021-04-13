@@ -79,12 +79,12 @@ class Angle {
         matrix[0][2] = 0;
 
         matrix[1][0] = 0;
-        matrix[1][1] = Math.cos(this.pitch);
-        matrix[1][2] = - Math.sin(this.pitch);
+        matrix[1][1] = Math.cos(util.toRadians(this.pitch));
+        matrix[1][2] = - Math.sin(util.toRadians(this.pitch));
 
         matrix[2][0] = 0;
-        matrix[2][1] = Math.sin(this.pitch);
-        matrix[2][2] = Math.cos(this.pitch);
+        matrix[2][1] = Math.sin(util.toRadians(this.pitch));
+        matrix[2][2] = Math.cos(util.toRadians(this.pitch));
         return matrix;
     }
 
@@ -93,17 +93,17 @@ class Angle {
      */
     getYawMatrix() {
         const matrix = new Matrix(3, 3);
-        matrix[0][0] = Math.cos(this.yaw);
+        matrix[0][0] = Math.cos(util.toRadians(this.yaw));
         matrix[0][1] = 0;
-        matrix[0][2] = Math.sin(this.yaw);
+        matrix[0][2] = Math.sin(util.toRadians(this.yaw));
 
         matrix[1][0] = 0;
         matrix[1][1] = 1;
         matrix[1][2] = 0;
 
-        matrix[2][0] = - Math.sin(this.yaw);
+        matrix[2][0] = - Math.sin(util.toRadians(this.yaw));
         matrix[2][1] = 0;
-        matrix[2][2] = Math.cos(this.yaw);
+        matrix[2][2] = Math.cos(util.toRadians(this.yaw));
         return matrix;
     }
 
@@ -112,12 +112,12 @@ class Angle {
      */
     getRollMatrix() {
         const matrix = new Matrix(3, 3);
-        matrix[0][0] = Math.cos(this.roll);
-        matrix[0][1] = - Math.sin(this.roll);
+        matrix[0][0] = Math.cos(util.toRadians(this.roll));
+        matrix[0][1] = - Math.sin(util.toRadians(this.roll));
         matrix[0][2] = 0;
 
-        matrix[1][0] = Math.sin(this.roll);
-        matrix[1][1] = Math.cos(this.roll);
+        matrix[1][0] = Math.sin(util.toRadians(this.roll));
+        matrix[1][1] = Math.cos(util.toRadians(this.roll));
         matrix[1][2] = 0;
 
         matrix[2][0] = 0;
