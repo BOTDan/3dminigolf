@@ -37,10 +37,11 @@ class Angle {
      * Returns a vector pointing in the direction of this angle
      */
     getForward() {
+        const m = this.getRotationMatrix();
         const out = new Vector();
-        out.x = Math.sin(this.pitch) * Math.cos(this.yaw);
-        out.y = - Math.sin(this.yaw);
-        out.z = Math.cos(this.yaw) * Math.cos(this.pitch);
+        out.x = m[0][2];
+        out.y = m[1][2];
+        out.z = m[2][2];
         return out;
     }
 
@@ -73,16 +74,16 @@ class Angle {
      */
     getPitchMatrix() {
         const matrix = new Matrix(3, 3);
-        matrix[0][0] = Math.cos(this.pitch);
+        matrix[0][0] = 1;
         matrix[0][1] = 0;
-        matrix[0][2] = Math.sin(this.pitch);
+        matrix[0][2] = 0;
 
         matrix[1][0] = 0;
-        matrix[1][1] = 1;
-        matrix[1][2] = 0;
+        matrix[1][1] = Math.cos(this.pitch);
+        matrix[1][2] = - Math.sin(this.pitch);
 
-        matrix[2][0] = - Math.sin(this.pitch);
-        matrix[2][1] = 0;
+        matrix[2][0] = 0;
+        matrix[2][1] = Math.sin(this.pitch);
         matrix[2][2] = Math.cos(this.pitch);
         return matrix;
     }
@@ -92,16 +93,16 @@ class Angle {
      */
     getYawMatrix() {
         const matrix = new Matrix(3, 3);
-        matrix[0][0] = 1;
+        matrix[0][0] = Math.cos(this.yaw);
         matrix[0][1] = 0;
-        matrix[0][2] = 0;
+        matrix[0][2] = Math.sin(this.yaw);
 
         matrix[1][0] = 0;
-        matrix[1][1] = Math.cos(this.yaw);
-        matrix[1][2] = - Math.sin(this.yaw);
+        matrix[1][1] = 1;
+        matrix[1][2] = 0;
 
-        matrix[2][0] = 0;
-        matrix[2][1] = Math.sin(this.yaw);
+        matrix[2][0] = - Math.sin(this.yaw);
+        matrix[2][1] = 0;
         matrix[2][2] = Math.cos(this.yaw);
         return matrix;
     }
@@ -133,7 +134,7 @@ class Angle {
         const yaw = this.getYawMatrix();
         const roll = this.getRollMatrix();
 
-        const combined = pitch.multiply(yaw).multiply(roll);
+        const combined = yaw.multiply(pitch).multiply(roll);
         const final = combined.resize(4, 4);
         final[3][3] = 1;
         return final;

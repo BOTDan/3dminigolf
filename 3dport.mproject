@@ -24,15 +24,15 @@
 		"gamebase_ui_scroll": "gamebase/ui/scroll.js",
 		"gamebase_ui_text": "gamebase/ui/text.js",
 		"gamebase_ui_checkbox": "gamebase/ui/checkbox.js",
-		"0_glmatrix": "custom/glmatrix.js",
-		"0_mathgl": "custom/mathgl.js",
 		"1_matrix": "custom/matrix.js",
 		"1_vector": "custom/vector.js",
 		"1_angle": "custom/angle.js",
 		"1_polygon": "custom/polygon.js",
-		"1_polygon2": "custom/polygon2.js",
-		"1_renderable": "custom/renderable.js",
-		"main": "custom/main.js"
+		"1_camera": "custom/camera.js",
+		"1_model": "custom/model.js",
+		"1_draw": "custom/draw.js",
+		"2_plyparser": "custom/plyparser.js",
+		"main": "custom/game.js"
 	},
 	"textures": {
 		"font_mplus1m_light": "gamebase/fonts/font_mplus1m_light.png",

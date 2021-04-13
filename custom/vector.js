@@ -111,6 +111,18 @@ class Vector {
     }
 
     /**
+     * Returns the cross product between this vector and another
+     * @param {Vector} value The other vector
+     */
+    cross(value) {
+        return new Vector(
+            this.y * value.z - this.z * value.y,
+            this.z * value.x - this.x * value.z,
+            this.x * value.y - this.y * value.x
+        );
+    }
+
+    /**
      * Returns the squares length of this vector
      */
     lengthSqr() {

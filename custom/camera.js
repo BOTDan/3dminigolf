@@ -7,11 +7,12 @@ class Camera {
    */
   constructor(pos, angles, fov, aspect, near, far) {
     this.position = pos || new Vector(0, 0, 0);
-    this.rotation = angles || new angles(0, 0, 0);
+    this.rotation = angles || new Angle(0, 0, 0);
+    this.aspect = aspect || (_m.width/_m.height);
     this.fov = fov || 90;
-    this.aspect = aspect || _m.width/_m.height;
     this.near = near || 0.1;
     this.far = far || 100;
+    this.updateMatrix();
   }
 
   get position() { return this._position; }
@@ -23,6 +24,12 @@ class Camera {
   get aspect() { return this._aspect; }
   get near() { return this._near; }
   get far() { return this._far; }
+  get matrix() {
+    if (!this._matrix) {
+      this._matrix = this.getFinalMatrix();
+    }
+    return this._matrix;
+  }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
@@ -37,7 +44,7 @@ class Camera {
   }
   set aspect(value) { this._aspect = value; }
   set near(value) { this._near = value; }
-  set far(value) { this.far = value; }
+  set far(value) { this._far = value; }
 
   /**
    * Get the transformation matrix to convert world coords to camera-relative coords
@@ -99,5 +106,22 @@ class Camera {
     matrix[3][2] = - (far + near) / (far - near);
     
     return matrix;
+  }
+
+  /**
+   * Returns a single transformation matrix to move world coords to camera coords.
+   * @returns {Matrix} A transformation matrix
+   */
+  getFinalMatrix() {
+    const transformationMatrix = this.getTransformationMatrix();
+    const projectionMatrix = this.getPerspectiveProjectionMatrix();
+    return transformationMatrix.multiply(projectionMatrix);
+  }
+
+  /**
+   * Updates the internal .matrix property. Should be used every frame before rendering
+   */
+  updateMatrix() {
+    this._matrix = this.getFinalMatrix();
   }
 }
