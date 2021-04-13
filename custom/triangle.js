@@ -164,4 +164,24 @@ class Triangle {
       );
     }
   }
+
+  /**
+   * Draws this polygons wireframe to the screen
+   */
+  drawWireframe(overrideCull) {
+    if (this.culled && !overrideCull) { return; }
+    for (let i=1; i < this.screenVerts.length - 1; i++) {
+      const point1 = this.screenVerts[0];
+      const point2 = this.screenVerts[i];
+      const point3 = this.screenVerts[i+1];
+      _r.color(0, 1, 1, 1);
+      drawutil.line(point1.x, point1.y, point2.x, point2.y);
+      drawutil.line(point3.x, point3.y, point2.x, point2.y);
+    }
+    if (this.screenVerts.length > 2) {
+      const point1 = this.screenVerts[0];
+      const point2 = this.screenVerts[this.screenVerts.length-1];
+      drawutil.line(point1.x, point1.y, point2.x, point2.y);
+    }
+  }
 }
