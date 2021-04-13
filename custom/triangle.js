@@ -37,10 +37,12 @@ class Triangle {
   get clippedVerts() { return this._clippedVerts; }
   get screenVerts() { return this._screenVerts; }
   get culled() { return this._culled; }
+  get worldVerts() { return this._worldVerts; }
 
   set verts(value) { this._verts = value; }
   set colour(value) { this._colour = value; }
   set flipNormal(value) { this._flipNormal = value; }
+  set worldVerts(value) { this._worldVerts = value; }
 
   /**
    * Internally updates the zmin, zmax and zavg. Usually called after clipping
@@ -133,15 +135,24 @@ class Triangle {
   }
 
   /**
+   * Used to overwrite the colour at render. Useful for faking lighting.
+   * @returns {Number[]}
+   */
+  calcColour() {
+    return this.colour;
+  }
+
+  /**
    * Draws this polygon to the screen
    */
   draw() {
     if (this.culled) { return; }
+    const colour = this.calcColour();
     for (let i=1; i < this.screenVerts.length - 1; i++) {
       const point1 = this.screenVerts[0];
       const point2 = this.screenVerts[i];
       const point3 = this.screenVerts[i+1];
-      _r.color(...this.colour);
+      _r.color(...colour);
       _r.quad(
         point1.x, point1.y, 0, 0,
         point2.x, point2.y, 1, 0,

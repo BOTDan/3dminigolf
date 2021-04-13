@@ -27,7 +27,7 @@ class Model2 {
   set angles(value) { this.rotation = value; }
   set scale(value) { this._scale = value; }
   set verts(value) { this._verts = value; }
-  set faces() { this._faces = value; }
+  set faces(value) { this._faces = value; }
 
   /**
    * Adds vertices to this model
@@ -43,8 +43,11 @@ class Model2 {
    * @param  {...Face} face The face(s) to add
    * @returns The new faces count
    */
-  addFace(...face) {
-    return this.faces.push(...face);
+  addFace(...faces) {
+    faces.forEach((face) => {
+      face.calcColour = (tri) => { return this.calcColour(tri); };
+    })
+    return this.faces.push(...faces);
   }
 
   /**
@@ -73,7 +76,7 @@ class Model2 {
    * @param {Camera} camera The camera to use
    */
   updateCameraVerts(camera) {
-    this._cameraVerts = this.verts.map((vert) => {
+    this._cameraVerts = this._worldVerts.map((vert) => {
       return vert.multiplyMatrix(camera.matrix);
     });
   }
@@ -94,7 +97,7 @@ class Model2 {
   triangulate() {
     const triangles = [];
     this.faces.forEach((face) => {
-      triangles.push(...face.triangulate(this._cameraVerts));
+      triangles.push(...face.triangulate(this._cameraVerts, this._worldVerts));
     });
     return triangles;
   }
@@ -104,6 +107,13 @@ class Model2 {
    */
   think() {
 
+  }
+
+  /**
+   * Function used to calculate a triangle's colour. Useful for faking lighting.
+   */
+  calcColour(triangle) {
+    return triangle.colour;
   }
 
   static Cube() {
