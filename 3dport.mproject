@@ -34,7 +34,7 @@
 		"1_model": "custom/model.js",
 		"1_draw": "custom/draw.js",
 		"2_plyparser": "custom/plyparser.js",
-		"0_model_mg_floor_bump": "custom/models/mg_floor_bump.js",
+		"3_models": "custom/models/mingolf_models.js",
 		"main": "custom/dev.js"
 	},
 	"textures": {
