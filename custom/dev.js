@@ -10,16 +10,18 @@ const MODELS = [];
 // testPoly1.flipNormal = true;
 
 const cube = Model.Cube();
+cube.scale.x = 0.1;
 MODELS.push(cube);
 
-const monkeyData = parsePLY(testData);
+const monkeyData = parsePLY(mg_floor_bump);
 for (let i=0; i < 5; i++) {
   const monkey = generateModel(monkeyData);
-  monkey.rotation.pitch = 90;
-  monkey.position.x = 5 + i * 3;
+  // monkey.rotation.pitch = 90;
+  monkey.position.x = 5 + i * 1;
   monkey.calcColour = (tri) => {
-    const normal = util.findNormal(tri.worldVerts);
-    const amountUp = (1 + normal.y) / 2;
+    const normal = util.findNormal(tri.worldVerts).invert();
+    const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+    const amountUp = (1 + amount) / 2;
     return [0, amountUp, 0, 1];
   };
   MODELS.push(monkey);
