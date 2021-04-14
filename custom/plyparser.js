@@ -1,3 +1,13 @@
+const ModelCache = {
+  models: {},
+  register(name, modelPlyString) {
+    this.models[name] = parsePLY(modelPlyString);
+  },
+  newModel(name) {
+    return generateModel(this.models[name]);
+  }
+};
+
 function parsePLY(fileContent) {
   const lines = fileContent.split("\n");
   if (lines.length === 0) {
