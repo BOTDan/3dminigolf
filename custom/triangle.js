@@ -86,7 +86,7 @@ class Triangle {
    * @returns {Vector[]}
    */
   clipEdge(point1, point2, near=0) {
-    const planePoint = new Vector(0, 0, near);
+    const planePoint = new Vector(0, 0, 0);
     const planeNormal = new Vector(0, 0, 1);
     if (this.isPointOutsideZ(point1)) {
       if (this.isPointOutsideZ(point2)) {
@@ -94,7 +94,7 @@ class Triangle {
         return [];
       }
       // Moving from outside to inside
-      const point = util.getLineIntersection(point1, point2, planePoint, planeNormal);
+      const point = util.getLineIntersection(point2, point1, planePoint, planeNormal);
       return [point];
     } else {
       if (this.isPointOutsideZ(point2)) {
@@ -166,7 +166,7 @@ class Triangle {
   }
 
   /**
-   * Draws this polygons wireframe to the screen
+   * Draws this triangles wireframe to the screen
    */
   drawWireframe(overrideCull) {
     if (this.culled && !overrideCull) { return; }
