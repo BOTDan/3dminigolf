@@ -32,7 +32,16 @@ GameBase.Console.AddCommand("outline", (bool) => {
   }
   const shouldDraw = parseInt(bool);
   drawWireframe = (shouldDraw > 0);
-}, "test");
+}, "(0/1) [DEBUG] If wireframes should be drawn around triangles.");
+
+let drawVertices = false;
+GameBase.Console.AddCommand("points", (bool) => {
+  if (isNaN(bool)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
+  }
+  const shouldDraw = parseInt(bool);
+  drawVertices = (shouldDraw > 0);
+}, "(0/1) [DEBUG] If vertices of triangles should be drawn.");
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   CAMERA.updateMatrix();
@@ -58,6 +67,9 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
     triangle.draw();
     if (drawWireframe) {
       triangle.drawWireframe();
+    }
+    if (drawVertices) {
+      triangle.drawVertices();
     }
   });
   
@@ -87,7 +99,7 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   let forward = 0;
   let right = 0;
   let up = 0;
-  let speed = 0.1;
+  let speed = 0.01;
 
   if (GameBase.IsKeyDown("W")) { forward += 1; };
   if (GameBase.IsKeyDown("S")) { forward -= 1; };
@@ -95,7 +107,7 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   if (GameBase.IsKeyDown("D")) { right += 1; };
   if (GameBase.IsKeyDown("SPACEBAR")) { up += 1; }
   if (GameBase.IsKeyDown("LEFT_CONTROL")) { up -= 1; }
-  if (GameBase.IsKeyDown("LEFT_SHIFT")) { speed = 0.5; };
+  if (GameBase.IsKeyDown("LEFT_SHIFT")) { speed = 0.1; };
 
   const lookDir = CAMERA.rotation.getForward();
   const rightDir = CAMERA.rotation.getRight();
