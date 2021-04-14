@@ -15,16 +15,29 @@ MODELS.push(cube);
 
 const monkeyData = parsePLY(mg_floor_bump);
 for (let i=0; i < 5; i++) {
-  const monkey = generateModel(monkeyData);
-  // monkey.rotation.pitch = 90;
-  monkey.position.x = 5 + i * 1;
-  monkey.calcColour = (tri) => {
+  // const monkey = generateModel(monkeyData);
+  const windmill = ModelCache.newModel("MINIGOLF_Windmill");
+  windmill.position.x = 5 + i * 1;
+  windmill.calcColour = (tri) => {
     const normal = util.findNormal(tri.worldVerts).invert();
     const amount = normal.dot(new Vector(-1, -5, -1).normalize());
     const amountUp = (1 + amount) / 2;
     return [0, amountUp, 0, 1];
   };
-  MODELS.push(monkey);
+  const blades = ModelCache.newModel("MINIGOLF_Windmill_Blades");
+  blades.position.x = 5 + i * 1;
+  blades.position.y = 0.9;
+  blades.position.z = -0.425;
+  blades.calcColour = (tri) => {
+    const normal = util.findNormal(tri.worldVerts).invert();
+    const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+    const amountUp = (1 + amount) / 2;
+    return [amountUp, 0, 0, 1];
+  };
+  blades.think = function() {
+    this.rotation.roll += 1;
+  }
+  MODELS.push(windmill, blades);
 }
 
 let drawWireframe = false;
