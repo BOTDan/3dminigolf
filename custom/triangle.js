@@ -184,4 +184,26 @@ class Triangle {
       drawutil.line(point1.x, point1.y, point2.x, point2.y);
     }
   }
+
+  /**
+   * Draws this triangles vertices to the screen
+   */
+  drawVertices() {
+    this.screenVerts.forEach((vert, i) => {
+      _r.color(0, 1, 1, 1);
+      _r.rect(vert.x-4, vert.y-4, 8, 8);
+    });
+  }
+
+  /**
+   * Draws this triangles vertex numbers to the screen
+   */
+  drawVertNumbers() {
+    GameBase.Text.SetFont("Mplus1m Bold");
+    GameBase.Text.SetSize(12);
+    this.screenVerts.forEach((vert, i) => {
+      _r.color(0, 0, 1, 1);
+      GameBase.Text.DrawText(vert.x, vert.y, `${i}`, 1, 1);
+    });
+  }
 }
