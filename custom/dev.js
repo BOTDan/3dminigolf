@@ -37,7 +37,15 @@ for (let i=0; i < 5; i++) {
   blades.think = function() {
     this.rotation.roll += 1;
   }
-  MODELS.push(windmill, blades);
+  const bump = ModelCache.newModel("MINIGOLF_Bump_Walls");
+  bump.position = new Vector(5 + i * 1, 0, 1);
+  bump.calcColour = (tri) => {
+    const normal = util.findNormal(tri.worldVerts).invert();
+    const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+    const amountUp = (1 + amount) / 2;
+    return [0, 0, amountUp, 1];
+  };
+  MODELS.push(windmill, blades, bump);
 }
 
 let drawWireframe = false;
