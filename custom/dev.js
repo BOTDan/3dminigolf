@@ -1,3 +1,5 @@
+GameBase.Debug.ShowFPS = true;
+
 const CAMERA = new Camera(new Vector(0, 0, -10));
 const MODELS = [];
 
@@ -76,27 +78,40 @@ GameBase.Console.AddCommand("points", (bool) => {
 }, "(0/1) [DEBUG] If vertices of triangles should be drawn.");
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
+  _r.layer = 0;
   CAMERA.updateMatrix();
 
   _r.color(1, 1, 1, 1);
   _r.rect(0, 0, _m.width, _m.height);
 
+  let startTime = Date.now();
   // Extract all the triangles from their models
   const triangles = [];
   MODELS.forEach((model) => {
     model.update(CAMERA);
     triangles.push(...model.triangulate());
   });
+  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Getting Triangles`, [1, 1, 0, 1]);
+
+  startTime = Date.now();
   // Get the triangles readt to render
   triangles.forEach((triangle) => {
     triangle.clip(CAMERA);
     triangle.toScreen();
   });
+  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Clipping Triangles`, [1, 1, 0, 1]);
+
+  startTime = Date.now();
   // Do a depth-sort on the triangles to try make render depth accurate
   triangles.sort((a, b) => b.zMin - a.zMin);
+  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Sorting Triangles`, [1, 1, 0, 1]);
+
+  startTime = Date.now();
   // Finally, draw the triangles
   triangles.forEach((triangle) => {
-    triangle.draw();
+    if (drawTriangles) {
+      triangle.draw();
+    }
     if (drawWireframe) {
       triangle.drawWireframe();
     }
@@ -104,9 +119,9 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
       triangle.drawVertices();
     }
   });
+  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Drawing Triangles`, [1, 1, 0, 1]);
   
-  drawFPS();
-  drawTriangleCount(triangles.length);
+  GameBase.Debug.AddOverlay(`${triangles.length} Triangles`);
 });
 
 let lastTime = new Date().getTime();
@@ -116,7 +131,7 @@ function drawFPS() {
   _r.color(0, 1, 0, 1);
   GameBase.Text.SetFont("Mplus1m Bold");
   GameBase.Text.SetSize(30);
-  GameBase.Text.DrawText(0, 0, `${Math.floor(fps)}FPS`);
+  GameBase.Text.DrawText(0, 100, `${Math.floor(fps)}FPS`);
   lastTime = curTime;
 }
 
