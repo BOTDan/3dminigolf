@@ -10,7 +10,7 @@ const MODELS = [];
 // testPoly1.flipNormal = true;
 
 const cube = Model.Cube();
-cube.scale.x = 0.1;
+// cube.scale.x = 0.1;
 MODELS.push(cube);
 
 const monkeyData = parsePLY(mg_floor_bump);
@@ -35,7 +35,7 @@ for (let i=0; i < 5; i++) {
     return [amountUp, 0, 0, 1];
   };
   blades.think = function() {
-    this.rotation.roll += 1;
+    // this.rotation.roll += 1;
   }
   const bump = ModelCache.newModel("MINIGOLF_Bump_Walls");
   bump.position = new Vector(5 + i * 1, 0, 1);
@@ -47,6 +47,15 @@ for (let i=0; i < 5; i++) {
   };
   MODELS.push(windmill, blades, bump);
 }
+
+let drawTriangles = true;
+GameBase.Console.AddCommand("faces", (bool) => {
+  if (isNaN(bool)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
+  }
+  const shouldDraw = parseInt(bool);
+  drawTriangles = (shouldDraw > 0);
+}, "(0/1) [DEBUG] If faces of triangles should be drawn.");
 
 let drawWireframe = false;
 GameBase.Console.AddCommand("outline", (bool) => {
@@ -122,7 +131,7 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   let forward = 0;
   let right = 0;
   let up = 0;
-  let speed = 0.01;
+  let speed = 0.05;
 
   if (GameBase.IsKeyDown("W")) { forward += 1; };
   if (GameBase.IsKeyDown("S")) { forward -= 1; };
