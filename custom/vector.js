@@ -137,6 +137,20 @@ class Vector {
     }
 
     /**
+     * Linearly interpolates towards another vector by fraction
+     * @param {Vector} to The end position
+     * @param {Number} amount The fraction to interpolate by
+     */
+    lerp(to, amount) {
+        const distance = to.subtract(this);
+        return new Vector(
+            this.x + distance.x * amount,
+            this.y + distance.y * amount,
+            this.z + distance.z * amount
+        );
+    }
+
+    /**
      * Returns this vector as a translation matrix
      */
     getTranslationMatrix() {
