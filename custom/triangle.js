@@ -74,6 +74,7 @@ class Triangle {
     let normal = util.findNormal(this.clippedVerts);
     if (normal === null) { return true; }
     if (this.flipNormal) { normal = normal.invert(); }
+    this._normal = normal;
     const dot = new Vector(0, 0, -1).dot(normal);
     return (dot < 0);
   }
