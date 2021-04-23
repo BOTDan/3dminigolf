@@ -15,6 +15,7 @@
 		"gamebase_text": "gamebase/text.js",
 		"gamebase_ui": "gamebase/ui.js",
 		"gamebase_console": "gamebase/console.js",
+		"gamebase_debug": "gamebase/debug.js",
 		"gamebase_ui_base": "gamebase/ui/base.js",
 		"gamebase_ui_button": "gamebase/ui/button.js",
 		"gamebase_ui_entry": "gamebase/ui/entry.js",

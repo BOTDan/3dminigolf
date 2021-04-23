@@ -227,6 +227,7 @@ GameBase.UI.Draw = function() {
 		v._Draw();
 		_r.pop(); // Pointless
 	}
+	GameBase.Debug.Draw();
 	this.DrawCursor();
 }
 // Register sa cursor
