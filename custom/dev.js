@@ -96,7 +96,7 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
 
   let startTime = Date.now();
   // Extract all the triangles from their models
-  const triangles = [];
+  let triangles = [];
   MODELS.forEach((model) => {
     model.update(CAMERA);
     triangles.push(...model.triangulate());
@@ -110,6 +110,11 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
     triangle.toScreen();
   });
   GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Clipping Triangles`, [1, 1, 0, 1]);
+
+  // Remove unused triangles
+  startTime = Date.now();
+  triangles = triangles.filter((tri) => !tri.culled);
+  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Removing Triangles`, [1, 1, 0, 1]);
 
   startTime = Date.now();
   // Do a depth-sort on the triangles to try make render depth accurate
