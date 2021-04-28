@@ -26,7 +26,7 @@ monkey.calcColour = (tri) => {
 };
 MODELS.push(monkey);
 
-for (let i=0; i < 5; i++) {
+for (let i=0; i < 0; i++) {
   // const monkey = generateModel(monkeyData);
   const windmill = ModelCache.newModel("MINIGOLF_Windmill");
   windmill.position.x = 5 + i * 1;
@@ -59,6 +59,32 @@ for (let i=0; i < 5; i++) {
   };
   MODELS.push(windmill, blades, bump);
 }
+
+// Create an actual course
+function flatLighting(tri) {
+  const normal = util.findNormal(tri.worldVerts).invert();
+  const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+  const amountUp = (1 + amount) / 2;
+  return [0, 0, amountUp, 1];
+};
+const start = ModelCache.newModel("MINIGOLF_End");
+start.position = new Vector(0, 0, 5);
+start.rotation = new Angle(0, 90, 0);
+start.calcColour = flatLighting;
+const straight1 = ModelCache.newModel("MINIGOLF_Straight");
+straight1.position = new Vector(1, 0, 5);
+straight1.rotation = new Angle(0, 90, 0);
+straight1.calcColour = flatLighting;
+const hill = ModelCache.newModel("MINIGOLF_Hill_Round");
+hill.position = new Vector(2, 0, 5);
+hill.rotation = new Angle(0, 90, 0);
+hill.calcColour = flatLighting;
+const end = ModelCache.newModel("MINIGOLF_End_Hole");
+end.position = new Vector(3, 0, 5);
+end.rotation = new Angle(0, -90, 0);
+end.calcColour = flatLighting;
+
+MODELS.push(start, straight1, hill, end);
 
 let drawTriangles = true;
 GameBase.Console.AddCommand("faces", (bool) => {
