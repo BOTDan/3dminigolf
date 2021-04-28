@@ -15,7 +15,17 @@ const cube = Model.Cube();
 // cube.scale.x = 0.1;
 MODELS.push(cube);
 
-const monkeyData = parsePLY(mg_floor_bump);
+const monkey = ModelCache.newModel("DEBUG_Monkey");
+monkey.position.x = 3;
+monkey.rotation.pitch = 90;
+monkey.calcColour = (tri) => {
+  const normal = util.findNormal(tri.worldVerts).invert();
+  const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+  const amountUp = (1 + amount) / 2;
+  return [amountUp, amountUp, amountUp, 1];
+};
+MODELS.push(monkey);
+
 for (let i=0; i < 5; i++) {
   // const monkey = generateModel(monkeyData);
   const windmill = ModelCache.newModel("MINIGOLF_Windmill");
