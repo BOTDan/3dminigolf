@@ -23,9 +23,9 @@ class Triangle {
     this._screenVerts = [];
 
     this._normal = null;
-    this._nearZ = null;
-    this._farZ = null;
-    this._avgZ = null;
+    this._zMin = null;
+    this._zMax = null;
+    this._zAvg = null;
     this._culled = false;
   }
 
