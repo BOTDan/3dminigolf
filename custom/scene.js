@@ -30,8 +30,14 @@ class Scene {
 
   set posX(value) { this._posX = value; }
   set posY(value) { this._posY = value; }
-  set width(value) { this._width = value; }
-  set height(value) { this._height = value; }
+  set width(value) {
+    this._width = value;
+    this.camera.aspect = this.width / this.height;
+  }
+  set height(value) {
+    this._height = value;
+    this.camera.aspect = this.width / this.height;
+  }
   set camera(value) { this._camera = value; } // Probably shouldn't allow this
   set models(value) { this._models = value; }
   set drawFaces(value) { this._drawFaces = value; }
@@ -92,6 +98,7 @@ class Scene {
     triangles.sort((a, b) => b.zMin - a.zMin);
 
     // Finally, draw the triangles
+    _r.pushcliprect(this.posX, this.posY, this.width, this.height);
     triangles.forEach((triangle) => {
       if (this.drawFaces) {
         triangle.draw();
@@ -103,5 +110,6 @@ class Scene {
         triangle.drawVertices();
       }
     });
+    _r.popclip();
   }
 }
