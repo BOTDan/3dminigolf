@@ -95,7 +95,7 @@ class Scene {
     triangles = triangles.filter((tri) => !tri.culled);
 
     // Do a depth-sort on the triangles to try make render depth accurate
-    triangles.sort((a, b) => b.zMin - a.zMin);
+    triangles.sort((a, b) => b.zMax - a.zMax);
 
     // Finally, draw the triangles
     if (clip) {
