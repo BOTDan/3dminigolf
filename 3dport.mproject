@@ -34,6 +34,7 @@
 		"1_face": "custom/face.js",
 		"1_model": "custom/model.js",
 		"1_draw": "custom/draw.js",
+		"1_scene": "custom/scene.js",
 		"2_plyparser": "custom/plyparser.js",
 		"3_models": "custom/models/mingolf_models.js",
 		"main": "custom/dev.js"

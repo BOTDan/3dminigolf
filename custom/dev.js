@@ -1,7 +1,6 @@
 GameBase.Debug.ShowFPS = true;
 
-const CAMERA = new Camera(new Vector(0, 0, -10));
-const MODELS = [];
+const SCENE = new Scene();
 
 // const testPoly1 = new Polygon([
 //   new Vector(0, 0, 0),
@@ -13,7 +12,7 @@ const MODELS = [];
 
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
-MODELS.push(cube);
+SCENE.addModel(cube);
 
 const monkey = ModelCache.newModel("DEBUG_Monkey");
 monkey.position.x = 3;
@@ -24,7 +23,7 @@ monkey.calcColour = (tri) => {
   const amountUp = (1 + amount) / 2;
   return [amountUp, amountUp, amountUp, 1];
 };
-MODELS.push(monkey);
+SCENE.addModel(monkey);
 
 for (let i=0; i < 0; i++) {
   // const monkey = generateModel(monkeyData);
@@ -57,7 +56,7 @@ for (let i=0; i < 0; i++) {
     const amountUp = (1 + amount) / 2;
     return [0, 0, amountUp, 1];
   };
-  MODELS.push(windmill, blades, bump);
+  SCENE.addModel(windmill, blades, bump);
 }
 
 // Create an actual course
@@ -84,85 +83,83 @@ end.position = new Vector(3, 0, 5);
 end.rotation = new Angle(0, -90, 0);
 end.calcColour = flatLighting;
 
-MODELS.push(start, straight1, hill, end);
+SCENE.addModel(start, straight1, hill, end);
 
-let drawTriangles = true;
 GameBase.Console.AddCommand("faces", (bool) => {
   if (isNaN(bool)) {
     GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
   }
   const shouldDraw = parseInt(bool);
-  drawTriangles = (shouldDraw > 0);
+  SCENE.drawFaces = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If faces of triangles should be drawn.");
 
-let drawWireframe = false;
 GameBase.Console.AddCommand("outline", (bool) => {
   if (isNaN(bool)) {
     GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
   }
   const shouldDraw = parseInt(bool);
-  drawWireframe = (shouldDraw > 0);
+  SCENE.drawEdges = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If wireframes should be drawn around triangles.");
 
-let drawVertices = false;
 GameBase.Console.AddCommand("points", (bool) => {
   if (isNaN(bool)) {
     GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
   }
   const shouldDraw = parseInt(bool);
-  drawVertices = (shouldDraw > 0);
+  SCENE.drawVertices = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If vertices of triangles should be drawn.");
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   _r.layer = 0;
-  CAMERA.updateMatrix();
+  SCENE.draw();
+  // CAMERA.updateMatrix();
 
-  _r.color(1, 1, 1, 1);
-  _r.rect(0, 0, _m.width, _m.height);
+  // _r.color(1, 1, 1, 1);
+  // _r.rect(0, 0, _m.width, _m.height);
 
-  let startTime = Date.now();
-  // Extract all the triangles from their models
-  let triangles = [];
-  MODELS.forEach((model) => {
-    model.update(CAMERA);
-    triangles.push(...model.triangulate());
-  });
-  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Getting Triangles`, [1, 1, 0, 1]);
+  // let startTime = Date.now();
+  // // Extract all the triangles from their models
+  // let triangles = [];
+  // MODELS.forEach((model) => {
+  //   model.update(CAMERA);
+  //   triangles.push(...model.triangulate());
+  // });
+  // GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Getting Triangles`, [1, 1, 0, 1]);
 
-  startTime = Date.now();
-  // Get the triangles readt to render
-  triangles.forEach((triangle) => {
-    triangle.clip(CAMERA);
-    triangle.toScreen();
-  });
-  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Clipping Triangles`, [1, 1, 0, 1]);
+  // startTime = Date.now();
+  // // Get the triangles readt to render
+  // triangles.forEach((triangle) => {
+  //   triangle.clip(CAMERA);
+  //   triangle.toScreen();
+  // });
+  // GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Clipping Triangles`, [1, 1, 0, 1]);
 
-  // Remove unused triangles
-  startTime = Date.now();
-  triangles = triangles.filter((tri) => !tri.culled);
-  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Removing Triangles`, [1, 1, 0, 1]);
+  // // Remove unused triangles
+  // startTime = Date.now();
+  // triangles = triangles.filter((tri) => !tri.culled);
+  // GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Removing Triangles`, [1, 1, 0, 1]);
 
-  startTime = Date.now();
-  // Do a depth-sort on the triangles to try make render depth accurate
-  triangles.sort((a, b) => b.zMin - a.zMin);
-  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Sorting Triangles`, [1, 1, 0, 1]);
+  // startTime = Date.now();
+  // // Do a depth-sort on the triangles to try make render depth accurate
+  // triangles.sort((a, b) => b.zMin - a.zMin);
+  // GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Sorting Triangles`, [1, 1, 0, 1]);
 
-  startTime = Date.now();
-  // Finally, draw the triangles
-  triangles.forEach((triangle) => {
-    if (drawTriangles) {
-      triangle.draw();
-    }
-    if (drawWireframe) {
-      triangle.drawWireframe();
-    }
-    if (drawVertices) {
-      triangle.drawVertices();
-    }
-  });
-  GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Drawing Triangles`, [1, 1, 0, 1]);
+  // startTime = Date.now();
+  // // Finally, draw the triangles
+  // triangles.forEach((triangle) => {
+  //   if (drawTriangles) {
+  //     triangle.draw();
+  //   }
+  //   if (drawWireframe) {
+  //     triangle.drawWireframe();
+  //   }
+  //   if (drawVertices) {
+  //     triangle.drawVertices();
+  //   }
+  // });
+  // GameBase.Debug.AddOverlay(`${Date.now() - startTime}ms Drawing Triangles`, [1, 1, 0, 1]);
   
-  GameBase.Debug.AddOverlay(`${triangles.length} Triangles`);
+  // GameBase.Debug.AddOverlay(`${triangles.length} Triangles`);
 });
 
 let lastTime = new Date().getTime();
@@ -188,6 +185,7 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   let right = 0;
   let up = 0;
   let speed = 0.05;
+  const CAMERA = SCENE.camera;
 
   if (GameBase.IsKeyDown("W")) { forward += 1; };
   if (GameBase.IsKeyDown("S")) { forward -= 1; };
@@ -205,13 +203,13 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   CAMERA.position = CAMERA.position.add(rightDir.multiply(right * speed));
   CAMERA.position = CAMERA.position.add(upDir.multiply(up * speed));
 
-  MODELS.forEach(model => model.think());
+  SCENE.think();
 });
 
 GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
   if (GameBase.GetKey(keycode) === "TAB") {
-    CAMERA.fov = 90;
-    CAMERA.rotation.roll = 0;
+    SCENE.camera.fov = 90;
+    SCENE.camera.rotation.roll = 0;
   }
 });
 
@@ -227,11 +225,11 @@ GameBase.Hooks.Add("OnMouseReleased", "h", () => {
 GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) => {
   if (dragging) {
     if (GameBase.IsKeyDown("LEFT_ALT")) {
-      CAMERA.rotation.roll -= dx*0.1;
-      CAMERA.fov += dy*0.1;
+      SCENE.camera.rotation.roll -= dx*0.1;
+      SCENE.camera.fov += dy*0.1;
     } else {
-      CAMERA.rotation.pitch -= dy*0.1;
-      CAMERA.rotation.yaw -= dx*0.1;
+      SCENE.camera.rotation.pitch -= dy*0.1;
+      SCENE.camera.rotation.yaw -= dx*0.1;
     }
   }
 });

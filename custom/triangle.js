@@ -129,12 +129,14 @@ class Triangle {
    * Converts the internal clipped verts to screen verts, ready for drawing
    * @param {Number} width Screen width
    * @param {Number} height Screen height
+   * @param {Number} x Start x position
+   * @param {Number} y Start y position
    */
-  toScreen(width=_m.width, height=_m.height) {
+  toScreen(width=_m.width, height=_m.height, x=0, y=0) {
     this._screenVerts = this.clippedVerts.map((vert) => {
       const screenX = (vert.x + 1) * 0.5 * width;
       const screenY = (1 - (vert.y + 1) * 0.5) * height;
-      return new Vector(screenX, screenY, vert.z);
+      return new Vector(x + screenX, y + screenY, vert.z);
     });
   }
 
