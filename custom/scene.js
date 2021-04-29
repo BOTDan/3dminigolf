@@ -74,7 +74,7 @@ class Scene {
   /**
    * Draws this scene to the screen
    */
-  draw() {
+  draw(clip=true) {
     // Cache camera matrix
     this.camera.updateMatrix();
 
@@ -98,7 +98,9 @@ class Scene {
     triangles.sort((a, b) => b.zMin - a.zMin);
 
     // Finally, draw the triangles
-    _r.pushcliprect(this.posX, this.posY, this.width, this.height);
+    if (clip) {
+      _r.pushcliprect(this.posX, this.posY, this.width, this.height);
+    }
     triangles.forEach((triangle) => {
       if (this.drawFaces) {
         triangle.draw();
@@ -110,6 +112,8 @@ class Scene {
         triangle.drawVertices();
       }
     });
-    _r.popclip();
+    if (clip) {
+      _r.popclip();
+    }
   }
 }
