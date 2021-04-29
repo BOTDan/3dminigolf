@@ -1,14 +1,7 @@
 GameBase.Debug.ShowFPS = true;
 
 const SCENE = new Scene();
-
-// const testPoly1 = new Polygon([
-//   new Vector(0, 0, 0),
-//   new Vector(10, 0, 0),
-//   new Vector(10, 10, 0),
-//   new Vector(0, 10, 0)
-// ]);
-// testPoly1.flipNormal = true;
+SCENE.camera.position.z = -10;
 
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
@@ -66,24 +59,32 @@ function flatLighting(tri) {
   const amountUp = (1 + amount) / 2;
   return [0, 0, amountUp, 1];
 };
+
 const start = ModelCache.newModel("MINIGOLF_End");
 start.position = new Vector(0, 0, 5);
 start.rotation = new Angle(0, 90, 0);
 start.calcColour = flatLighting;
+
 const straight1 = ModelCache.newModel("MINIGOLF_Straight");
 straight1.position = new Vector(1, 0, 5);
 straight1.rotation = new Angle(0, 90, 0);
 straight1.calcColour = flatLighting;
+
 const hill = ModelCache.newModel("MINIGOLF_Hill_Round");
 hill.position = new Vector(2, 0, 5);
 hill.rotation = new Angle(0, 90, 0);
 hill.calcColour = flatLighting;
+
 const end = ModelCache.newModel("MINIGOLF_End_Hole");
 end.position = new Vector(3, 0, 5);
 end.rotation = new Angle(0, -90, 0);
 end.calcColour = flatLighting;
 
-SCENE.addModel(start, straight1, hill, end);
+const ball = ModelCache.newModel("MINIGOLF_Ball");
+ball.position = new Vector(0, 0.1, 5);
+ball.calcColour = flatLighting;
+
+SCENE.addModel(start, straight1, hill, end, ball);
 
 GameBase.Console.AddCommand("faces", (bool) => {
   if (isNaN(bool)) {
