@@ -73,6 +73,7 @@ class Scene {
 
   /**
    * Draws this scene to the screen
+   * @param {Boolean} clip If the scene should be clipped (default true)
    */
   draw(clip=true) {
     // Cache camera matrix
@@ -115,5 +116,38 @@ class Scene {
     if (clip) {
       _r.popclip();
     }
+  }
+
+  /**
+   * Draws a line in 3D space to the scene
+   * @param {Vector} point1 Start point
+   * @param {Vector} point2 End point
+   * @param {Boolean} clip If the line should be clipped to the scene
+   */
+  drawLine(point1, point2, width=1, clip=true) {
+    let points = [
+      point1.multiplyMatrix(this.camera.matrix),
+      point2.multiplyMatrix(this.camera.matrix),
+    ];
+    // Clip the 2 points to the camera space
+    if (points[0].z > 1 || points[0].z < 0) {
+      if (point2.z > 1 || point2.z < 0) {
+        return;
+      }
+      points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1))
+    } else if (points[1].z > 1 || points[1].z < 0) {
+      points[1] = util.getLineIntersection(points[0], points[1], new Vector(0, 0, 0), new Vector(0, 0, 1));
+    }
+    // Convert points to screen coords
+    const screenPoints = points.map((vert) => {
+      const screenX = (vert.x + 1) * 0.5 * this.width;
+      const screenY = (1 - (vert.y + 1) * 0.5) * this.height;
+      return new Vector(this.posX + screenX, this.posY + screenY, vert.z);
+    });
+    // Finally, draw the line
+    drawutil.line(
+      screenPoints[0].x, screenPoints[0].y,
+      screenPoints[1].x, screenPoints[1].y,
+      width);
   }
 }
