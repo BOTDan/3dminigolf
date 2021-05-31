@@ -131,7 +131,7 @@ class Scene {
     ];
     // Clip the 2 points to the camera space
     if (points[0].z > 1 || points[0].z < 0) {
-      if (point2.z > 1 || point2.z < 0) {
+      if (points[1].z > 1 || points[1].z < 0) {
         return;
       }
       points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1))
