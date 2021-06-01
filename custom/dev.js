@@ -3,6 +3,20 @@ GameBase.Debug.ShowFPS = true;
 const SCENE = new Scene();
 SCENE.camera.position.z = -10;
 
+const PHYSICS = new PhysicsWorld();
+const BALL = new PhysicsBall();
+BALL.position = new Vector(5, 5, 5);
+BALL.velocity = new Vector(4, -6, 0);
+PHYSICS.ball = BALL;
+const plane = new PlaneCollider(
+  new Vector(0, 0, 0),
+  new Vector(10, 0 , 0),
+  new Vector(10, 0, 10),
+  new Vector(0, 0, 10),
+  true
+);
+PHYSICS.addCollider(plane);
+
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
 SCENE.addModel(cube);
@@ -113,6 +127,8 @@ GameBase.Console.AddCommand("points", (bool) => {
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   _r.layer = 0;
   SCENE.draw();
+  PHYSICS.debugDraw(SCENE);
+
   // CAMERA.updateMatrix();
 
   // _r.color(1, 1, 1, 1);
