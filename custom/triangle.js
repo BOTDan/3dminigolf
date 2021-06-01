@@ -95,12 +95,12 @@ class Triangle {
         return [];
       }
       // Moving from outside to inside
-      const point = util.getLineIntersection(point2, point1, planePoint, planeNormal);
+      const point = util.getLineIntersection(point2, point1, planePoint, planeNormal).point;
       return [point];
     } else {
       if (this.isPointOutsideZ(point2)) {
         // Moving from inside to outside
-        const point = util.getLineIntersection(point1, point2, planePoint, planeNormal);
+        const point = util.getLineIntersection(point1, point2, planePoint, planeNormal).point;
         return [point1, point];
       }
       // Both inside, nothing needs to be done

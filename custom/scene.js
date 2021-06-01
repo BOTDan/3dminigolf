@@ -134,9 +134,9 @@ class Scene {
       if (points[1].z > 1 || points[1].z < 0) {
         return;
       }
-      points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1))
+      points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1)).point
     } else if (points[1].z > 1 || points[1].z < 0) {
-      points[1] = util.getLineIntersection(points[0], points[1], new Vector(0, 0, 0), new Vector(0, 0, 1));
+      points[1] = util.getLineIntersection(points[0], points[1], new Vector(0, 0, 0), new Vector(0, 0, 1)).point;
     }
     // Convert points to screen coords
     const screenPoints = points.map((vert) => {

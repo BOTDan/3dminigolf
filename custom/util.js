@@ -13,7 +13,11 @@ const util = {
       return null;
     }
     const t = (planeNormal.dot(planePoint) - planeNormal.dot(lineStart)) / planeNormal.dot(lineDirection);
-    return lineStart.add(lineDirection.multiply(t));
+    const point = lineStart.add(lineDirection.multiply(t));
+    return {
+      point: point,
+      distance: t,
+    }
   },
 
   /**
