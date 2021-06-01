@@ -156,5 +156,31 @@ class Scene {
       _r.popclip();
     }
   }
+
+  /**
+   * Draws a point in 3D space to the screen
+   * @param {Vector} point The point
+   * @param {Number} width The width of the point
+   * @param {Boolean} clip If the point should be clipped to the scene
+   * @returns 
+   */
+  drawPoint(point, width=1, clip=true) {
+    // Convert world point to clip space
+    point = point.multiplyMatrix(this.camera.matrix);
+    if (point.z > 1 || point.z < 0) {
+      return;
+    }
+    // Convert clip space point to screen point
+    const screenX = (point.x + 1) * 0.5 * this.width;
+    const screenY = (1 - (point.y + 1) * 0.5) * this.height;
+    const screenPoint = new Vector(this.posX + screenX, this.posY + screenY, point.z);
+    // Finally, draw the point
+    if (clip) {
+      _r.pushcliprect(this.posX, this.posY, this.width, this.height);
+    }
+    _r.rect(screenPoint.x - (width/2), screenPoint.y - (width/2), width, width);
+    if (clip) {
+      _r.popclip();
+    }
   }
 }
