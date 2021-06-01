@@ -151,6 +151,14 @@ class Vector {
     }
 
     /**
+     * Reflects this vector by the given normal
+     * @param {Vector} normal The normal to reflect by
+     */
+    reflect(normal) {
+        return this.subtract(normal.multiply(this.dot(normal)).multiply(2));
+    }
+
+    /**
      * Returns this vector as a translation matrix
      */
     getTranslationMatrix() {
