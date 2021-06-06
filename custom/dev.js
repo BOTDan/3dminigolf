@@ -2,20 +2,39 @@ GameBase.Debug.ShowFPS = true;
 
 const SCENE = new Scene();
 SCENE.camera.position.z = -10;
+SCENE.camera.position.y = -5;
 
 const PHYSICS = new PhysicsWorld();
 const BALL = new PhysicsBall();
-BALL.position = new Vector(5, 5, 5);
-BALL.velocity = new Vector(4, -6, 0);
+BALL.position = new Vector(5, 3.5, 3.5);
+BALL.velocity = new Vector(0, -1, 0);
+BALL.size = 0.5;
 PHYSICS.ball = BALL;
-const plane = new PlaneCollider(
+PHYSICS.addCollider(new PlaneCollider(
   new Vector(0, 0, 0),
   new Vector(10, 0 , 0),
-  new Vector(10, 0, 10),
-  new Vector(0, 0, 10),
+  new Vector(10, 5, 10),
+  new Vector(0, 5, 10),
   true
-);
-PHYSICS.addCollider(plane);
+));
+PHYSICS.addCollider(new PlaneCollider(
+  new Vector(0, 5, 0),
+  new Vector(10, 5 , 0),
+  new Vector(10, 5, 10),
+  new Vector(0, 5, 10),
+  false
+));
+PHYSICS.addCollider(new PlaneCollider(
+  new Vector(0, 0, 0),
+  new Vector(10, 0, 0),
+  new Vector(10, 5, 0),
+  new Vector(0, 5, 0),
+  false
+));
+
+const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
+BALL_MODEL.calcColour = Model.flatLighting;
+SCENE.addModel(BALL_MODEL);
 
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
@@ -197,7 +216,7 @@ function drawTriangleCount(count) {
   GameBase.Text.DrawText(0, 30, `${count} Triangles`);
 }
 
-GameBase.Hooks.Add("Think", "test_key_hook", () => {
+GameBase.Hooks.Add("Think", "test_key_hook", (time, dt) => {
   let forward = 0;
   let right = 0;
   let up = 0;
@@ -220,7 +239,9 @@ GameBase.Hooks.Add("Think", "test_key_hook", () => {
   CAMERA.position = CAMERA.position.add(rightDir.multiply(right * speed));
   CAMERA.position = CAMERA.position.add(upDir.multiply(up * speed));
 
+  PHYSICS.think(dt);
   SCENE.think();
+  BALL_MODEL.position = BALL.position;
 });
 
 GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {

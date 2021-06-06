@@ -11,6 +11,7 @@ class PhysicsWorld {
     this.gravityDirection = new Vector(0, -1, 0);
     this.gravityStrength = 1;
     this.timescale = 1;
+    this._debugDraw = [];
   }
 
   get colliders() { return this._colliders; }
@@ -39,25 +40,108 @@ class PhysicsWorld {
     collider.ball = this.ball;
   }
 
+  /**
+   * Think function to make physics work
+   * @param {Number} dt deltaTime, or the time in seconds since the last think
+   */
   think(dt) {
+    this._debugDraw = [];
     let remainingDistance = this.ball.velocity.length() * dt * this.timescale;
+    let nextCollision = this.findNextCollision(remainingDistance);
+    while (nextCollision) {
+      this.processCollision(nextCollision);
+      remainingDistance -= nextCollision.distance;
+      nextCollision = this.findNextCollision(remainingDistance);
+    }
+    // No more collisions, move to the end of the line
+    const remainingVelocity = this.ball.velocity.normalize().multiply(remainingDistance);
+    this.ball.position = this.ball.position.add(remainingVelocity);
   }
 
-  findNextCollision() {
-    const distance = this.ball.frameVelocity.length(); // FIX: Use lengthSqr
+  /**
+   * Finds the nearest possible collision within range. Returns null if none found
+   * @param {Number} distance The distance the collision must be within
+   * @returns {Collision || null} The next nearest collision in range
+   */
+  findNextCollision(distance) {
+    let nearestCollision = null;
+    this.colliders.forEach((collider) => {
+      const collision = collider.calcCollision();
+      if (!collision) { return; }
+      if (!nearestCollision) {
+        nearestCollision = collision;
+        return;
+      }
+      if (collision.distance < nearestCollision.distance) {
+        nearestCollision = collision;
+      }
+    });
+    if (!nearestCollision || nearestCollision.distance > distance) {
+      // No collisions, move to end and finish
+      return null;
+    }
+    return nearestCollision;
+  }
 
+  /**
+   * Processes the given collision, moving the ball and altering velocity
+   * @param {Collision} collision The collision to process
+   */
+  processCollision(collision) {
+    this.ball.position = collision.position;
+    this.ball.velocity = this.ball.velocity.reflect(collision.normal);
   }
 
   /**
    * Debug draw function
-   * @param {SScene} scene The scene
+   * @param {Scene} scene The scene
    */
    debugDraw(scene) {
     this.colliders.forEach((collider) => {
       collider.debugDraw(scene);
     });
     this.ball.debugDraw(scene);
+    this._debugDraw.forEach((obj) => {
+      if (obj.colour) {
+        _r.color(...obj.colour);
+      } else {
+        _r.color(1, 0, 0, 1);
+      }
+      switch(obj.type) {
+        case 'point': {
+          scene.drawPoint(obj.pos, 10);
+          break;
+        }
+        case 'line': {
+          scene.drawLine(obj.startPos, obj.endPos, 2);
+          break;
+        }
+      }
+    });
   }
+}
+
+/**
+ * @class
+ * @classdesc Represents a collision. Created by Colliders
+ */
+class PhysicsCollision {
+  constructor(collider, position, distance, normal) {
+    this.collider = collider;
+    this.position = position;
+    this.distance = distance;
+    this.normal = normal;
+  }
+
+  set collider(value) { this._collider = value; }
+  set position(value) { this._position = value; }
+  set distance(value) { this._distance = value; }
+  set normal(value) { this._normal = value; }
+
+  get collider() { return this._collider; }
+  get position() { return this._position; }
+  get distance() { return this._distance; }
+  get normal() { return this._normal; }
 }
 
 /**
@@ -94,7 +178,7 @@ class PhysicsBall {
     _r.color(0, 1, 0, 1);
     scene.drawPoint(this.position, 10);
     _r.color(0.5, 1, 0, 1);
-    scene.drawLine(this.position, this.position.add(this.velocity));
+    // scene.drawLine(this.position, this.position.add(this.velocity));
   }
 }
 
@@ -146,28 +230,22 @@ class PlaneCollider {
 
   /**
    * Works out where the ball would cross the plane
-   * @returns {point: Vector, distance: Number} Collision data
+   * @returns {PhysicsCollision} Collision data
    */
-  calcCollisionPoint() {
+  calcCollision() {
+    if (this.ball.velocity.dot(this.normal) > 0) {
+      return null;
+    }
     const hitData = util.getLineIntersection(
       this.ball.position,
       this.ball.position.add(this.ball.velocity),
       this.offsetPoints[0],
       this.normal
     );
-    this._collisionPoint = hitData.point || null;
-    this._collisionDistance = hitData.distance || -Infinity;
-    this.calcCollision();
-    return hitData;
-  }
-
-  calcCollision() {
-    if (!this.collisionPoint || this.collisionDistance < 0) {
+    if (!hitData || hitData.distance < 0) {
       return null;
     }
-    const reflection = this.ball.velocity.reflect(this.normal);
-    const newLength = this.ball.velocity.length() - this.collisionDistance;
-    this._collisionReflection = reflection.normalize().multiply(newLength);
+    return new PhysicsCollision(this, hitData.point, hitData.distance, this.normal);
   }
 
   /**
@@ -193,17 +271,6 @@ class PlaneCollider {
     }
     if (this.offsetPoints.length > 2) {
       scene.drawLine(this.offsetPoints[0], this.offsetPoints[this.offsetPoints.length-1]);
-    }
-    // Draw collision point
-    this.calcCollisionPoint();
-    if (this.collisionPoint && this.collisionDistance >= 0) {
-      _r.color(1, 0, 0, 1);
-      scene.drawPoint(this.collisionPoint, 10);
-    }
-    // Draw reflection
-    if (this._collisionReflection && this.collisionPoint) {
-      _r.color(1, 0.5, 0, 1);
-      scene.drawLine(this.collisionPoint, this.collisionPoint.add(this._collisionReflection));
     }
   }
 }
