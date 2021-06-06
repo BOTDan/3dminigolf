@@ -150,4 +150,16 @@ class Model {
     }
     return model;
   }
+
+  /**
+   * Calculates flat lighting for a given triangle
+   * @param {Triangle} triangle The triangle to calculate light for
+   * @returns {Colour} A colour
+   */
+  static flatLighting(triangle) {
+    const normal = util.findNormal(triangle.worldVerts).invert();
+    const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+    const amountUp = (1 + amount) / 2;
+    return [amountUp, amountUp, amountUp, 1];
+  }
 }
