@@ -33,6 +33,7 @@ PHYSICS.addCollider(new PlaneCollider(
 ));
 
 const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
+BALL_MODEL.scale = new Vector(BALL.size, BALL.size, BALL.size);
 BALL_MODEL.calcColour = Model.flatLighting;
 SCENE.addModel(BALL_MODEL);
 
@@ -245,9 +246,24 @@ GameBase.Hooks.Add("Think", "test_key_hook", (time, dt) => {
 });
 
 GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
-  if (GameBase.GetKey(keycode) === "TAB") {
-    SCENE.camera.fov = 90;
-    SCENE.camera.rotation.roll = 0;
+  switch (GameBase.GetKey(keycode)) {
+    case "TAB": {
+      SCENE.camera.fov = 90;
+      SCENE.camera.rotation.roll = 0;
+      break;
+    }
+    case "KP_PLUS": {
+      PHYSICS.timescale += 0.1;
+      break;
+    }
+    case "KP_MINUS": {
+      PHYSICS.timescale -= 0.1;
+      break;
+    }
+    case "KP_ENTER": {
+      PHYSICS.paused = !PHYSICS.paused;
+      break;
+    }
   }
 });
 

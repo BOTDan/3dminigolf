@@ -11,6 +11,7 @@ class PhysicsWorld {
     this.gravityDirection = new Vector(0, -1, 0);
     this.gravityStrength = 1;
     this.timescale = 1;
+    this.paused = false;
     this._debugDraw = [];
   }
 
@@ -18,12 +19,14 @@ class PhysicsWorld {
   get gravityDirection() { return this._gravityDirection; }
   get gravityStrength() { return this._gravityStrength; }
   get timescale() { return this._timescale; }
+  get paused() { return this._paused; }
   get ball() { return this._ball; }
 
   set colliders(value) { this._colliders = value; }
   set gravityDirection(value) { this._gravityDirection = value; }
   set gravityStrength(value) { this._gravityStrength = value; }
   set timescale(value) { this._timescale = value; }
+  set paused(value) { this._paused = value; }
   set ball(value) {
     this._ball = value;
     this.colliders.forEach((collider) => {
@@ -46,6 +49,7 @@ class PhysicsWorld {
    */
   think(dt) {
     this._debugDraw = [];
+    if (this.paused) { return; }
     let remainingDistance = this.ball.velocity.length() * dt * this.timescale;
     let nextCollision = this.findNextCollision(remainingDistance);
     while (nextCollision) {
