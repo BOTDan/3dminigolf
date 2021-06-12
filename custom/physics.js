@@ -9,7 +9,7 @@ class PhysicsWorld {
   constructor() {
     this.colliders = [];
     this.gravityDirection = new Vector(0, -1, 0);
-    this.gravityStrength = 1;
+    this.gravityStrength = 7;
     this.timescale = 1;
     this.paused = false;
     this._debugDraw = [];
@@ -50,6 +50,7 @@ class PhysicsWorld {
   think(dt) {
     this._debugDraw = [];
     if (this.paused) { return; }
+    this.applyGravity(dt);
     let remainingDistance = this.ball.velocity.length() * dt * this.timescale;
     let nextCollision = this.findNextCollision(remainingDistance);
     while (nextCollision) {
@@ -94,6 +95,10 @@ class PhysicsWorld {
   processCollision(collision) {
     this.ball.position = collision.position;
     this.ball.velocity = this.ball.velocity.reflect(collision.normal);
+  }
+
+  applyGravity(dt) {
+    this.ball.velocity = this.ball.velocity.add(this.gravityDirection.multiply(this.gravityStrength * dt * this.timescale));
   }
 
   /**
@@ -258,7 +263,7 @@ class PlaneCollider {
    */
   debugDraw(scene) {
     // Draw the initial plane points
-    _r.color(1, 0, 0, 0.5);
+    _r.color(1, 1, 1, 1);
     for (let i=0; i < this.points.length - 1; i++) {
       scene.drawLine(this.points[i], this.points[i+1]);
     }
@@ -270,11 +275,11 @@ class PlaneCollider {
     scene.drawLine(this.points[0], this.points[0].add(this.normal.multiply(this.ball.size / 2)));
     // Draw the adjusted plane points
     _r.color(1, 0, 0, 1);
-    for (let i=0; i < this.offsetPoints.length - 1; i++) {
-      scene.drawLine(this.offsetPoints[i], this.offsetPoints[i+1]);
-    }
-    if (this.offsetPoints.length > 2) {
-      scene.drawLine(this.offsetPoints[0], this.offsetPoints[this.offsetPoints.length-1]);
-    }
+    // for (let i=0; i < this.offsetPoints.length - 1; i++) {
+    //   scene.drawLine(this.offsetPoints[i], this.offsetPoints[i+1]);
+    // }
+    // if (this.offsetPoints.length > 2) {
+    //   scene.drawLine(this.offsetPoints[0], this.offsetPoints[this.offsetPoints.length-1]);
+    // }
   }
 }
