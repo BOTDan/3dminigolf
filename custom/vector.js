@@ -204,4 +204,22 @@ class Vector {
         }
         return out;
     }
+
+    /**
+     * Returns an angle representing this vector
+     * @returns {Angle} An angle
+     */
+    asAngle() {
+        // const yaw = util.toDegrees(Math.atan(this.y / this.x));
+        // const pitch = util.toDegrees(Math.atan(this.z / Math.sqrt(this.x * this.x + this.y * this.y)));
+        // const yaw = util.toDegrees(Math.atan(this.z / this.x));
+        // const pitch = util.toDegrees(Math.atan(this.y / this.z));
+        // const a = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        // const pitch = util.toDegrees(Math.atan(this.y / this.x));
+        // const yaw = util.toDegrees(Math.acos(this.z / a));
+        const yaw = util.toDegrees(Math.atan(this.x / -this.z));
+        const pitch = util.toDegrees(Math.atan(this.y / Math.sqrt(this.x * this.x + this.z * this.z)));
+        const out = new Angle(-pitch, -yaw, 0);
+        return out;
+    }
 }
