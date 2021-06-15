@@ -208,7 +208,7 @@ class Vector {
     /**
      * Returns an angle representing this vector
      * @returns {Angle} An angle
-     * @see {@link https://stackoverflow.com/a/21627251} Huge credit
+     * @see Huge credit to {@link https://stackoverflow.com/a/21627251}
      */
     asAngle() {
         const pitch = util.toDegrees(Math.asin(this.y));
