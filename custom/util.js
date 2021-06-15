@@ -51,5 +51,20 @@ const util = {
    */
   toRadians(deg) {
     return deg * (Math.PI / 180);
-  }
+  },
+
+  /**
+   * Converts a 3D position to a 2D position relative to a plane
+   * @param {Vector} point The point to convert
+   * @param {Vector} planeOrigin The center of the plane
+   * @param {Angle} planeAngle The angles of the plane
+   * @returns {Vector} The 2D position
+   */
+  pointToPlane(point, planeOrigin, planeAngle) {
+    const originX = planeAngle.getRight().dot(planeOrigin);
+    const originY = planeAngle.getUp().dot(planeOrigin);
+    const x = planeAngle.getRight().dot(point);
+    const y = planeAngle.getUp().dot(point);
+    return new Vector(x - originX, y - originY, 0);
+  },
 }
