@@ -193,48 +193,68 @@ class PhysicsBall {
 
 /**
  * @class
- * @classdesc A collider representing part of a plane in 3D space
+ * @classdesc A generic collider. Should be extended
  */
-class PlaneCollider {
-  /**
-   * Creates a plane for collision
-   * @param {Vector} point1 The first point on the plane
-   * @param {Vector} point2 The second point on the plane
-   * @param {Vector} point3 The third point on the plane
-   * @param {Vector} point4 The forth point on the plane
-   */
-  constructor(point1, point2, point3, point4, flipNormal=false) {
-    this.points = [point1, point2, point3, point4];
-    this.flipNormal = flipNormal;
-    this._normal = util.findNormal(this.points);
-    if (this.flipNormal) {
-      this._normal = this.normal.invert();
-    }
-  }
-
-  get points() { return this._points; }
-  get flipNormal() { return this._flipNormal; }
-  get normal() { return this._normal; }
-  get offsetPoints() { return this._offsetPoints; }
-  get ballSize() { return this._ballSize; }
+class PhysicsCollider {
   get ball() { return this._ball; }
-  get collisionPoint() { return this._collisionPoint; }
-  get collisionDistance() { return this._collisionDistance; }
+  get ballSize() { return this._ballSize; }
 
-  set points(value) { this._points = value; }
-  set flipNormal(value) { this._flipNormal = value; }
   set ball(value) {
     this._ball = value;
-    this.calcOffsetPoints();
+    this.calcOffsetPosition();
   }
 
+  /**
+   * OVERWRITE: Calculates the closest collision with this collider
+   * @returns {PhysicsCollision} Collision data
+   */
+  calcCollision() {
+    return null;
+  }
+
+  /**
+   * OVERWRITE: Debug draw function
+   * @param {Scene} scene A scene object for 3D rendering
+   */
+  debugDraw(scene) {
+    return;
+  }
+}
+
+/**
+ * @class
+ * @classdesc A collider representing part of a plane in 3D space
+ */
+class PlaneCollider extends PhysicsCollider {
+  /**
+   * Creates a plane for collision
+   * @param {Vector} pos The position of the plane
+   * @param {Vector} normal The normal of the plane
+   * @param {Boolean} flipNormal If the normal should be flipped
+   */
+  constructor(pos, normal, flipNormal=false) {
+    super();
+    this.position = pos;
+    this.flipNormal = flipNormal;
+    this.normal = flipNormal ? normal.invert() : normal;
+  }
+
+  get position() { return this._position; }
+  get pos() { return this.position; }
+  get offsetPosition() { return this._offsetPosition; }
+  get normal() { return this._normal; }
+  get flipNormal() { return this._flipNormal; }
+
+  set position(value) { this._position = value; }
+  set pos(value) { this.position = value; }
+  set normal(value) { this._normal = value; }
+  set flipNormal(value) { this._flipNormal = value; }
+  
   /**
    * Pre-calculates offset points
    */
-  calcOffsetPoints() {
-    this._offsetPoints = this.points.map((point) => {
-      return point.add(this.normal.multiply(this.ball.size));
-    });
+   calcOffsetPosition() {
+    this._offsetPosition = this.position.add(this.normal.multiply(this.ball.size));
   }
 
   /**
@@ -248,13 +268,29 @@ class PlaneCollider {
     const hitData = util.getLineIntersection(
       this.ball.position,
       this.ball.position.add(this.ball.velocity),
-      this.offsetPoints[0],
+      this.offsetPosition,
       this.normal
     );
-    if (!hitData || hitData.distance < 0) {
+    if (!hitData || hitData.distance < -0.00001) {
       return null;
     }
+    if (!this.isValidCollision(hitData.point, hitData.distance)) {
+      return null;
+    }
+    // print(util.worldToLocal(hitData.point, new Angle(0, 0, 0), this.offsetPosition, this.normal.asAngle().getRight().asAngle()));
+    // util.test(hitData.point, this.normal.asAngle().getRight(), this.normal.asAngle().getUp());
+    // print(util.pointToPlane(hitData.point, this.offsetPosition, this.normal.asAngle()));
     return new PhysicsCollision(this, hitData.point, hitData.distance, this.normal);
+  }
+
+  /**
+   * Checks if the given collision point is valid
+   * @param {Vector} point The point of the collision
+   * @param {Number} distance The distance the ball is from the collision point
+   * @returns {Boolean}
+   */
+  isValidCollision(point, distance) {
+    return true;
   }
 
   /**
@@ -264,22 +300,70 @@ class PlaneCollider {
   debugDraw(scene) {
     // Draw the initial plane points
     _r.color(1, 1, 1, 1);
-    for (let i=0; i < this.points.length - 1; i++) {
-      scene.drawLine(this.points[i], this.points[i+1]);
+    scene.drawLine(this.position, this.offsetPosition);
+    scene.drawPoint(this.position, 10);
+    // Debug
+    const ang = this.normal.asAngle();
+    _r.color(1, 0, 0, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getForward().multiply(this.ball.size / 2)));
+    _r.color(0, 1, 0, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getUp().multiply(this.ball.size / 2)));
+    _r.color(0, 0, 1, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getRight().multiply(this.ball.size / 2)));
+  }
+
+  /**
+   * Creates a plane collider with edges between the 4 points
+   * @param {Vector} point1 The first point
+   * @param {Vector} point2 The second point
+   * @param {Vector} point3 The third point
+   * @param {Vector} point4 The forth point
+   * @returns {PlaneCollider} A plane collider with bouds of the 4 points
+   */
+  static Quadrilateral(points, flipNormal) {
+    let normal = util.findNormal(points);
+    if (!normal) { return null; }
+    if (flipNormal) {
+      normal = normal.invert();
     }
-    if (this.points.length > 2) {
-      scene.drawLine(this.points[0], this.points[this.points.length-1]);
+    const collider = new PlaneCollider(points[0], normal);
+    const normalAngle = normal.asAngle();
+    const points2d = points.map((point) => {return util.pointToPlane(point, points[0], normalAngle)});
+    collider.isValidCollision = (point, distance) => {
+      let sign = 0;
+      const point2d = util.pointToPlane(point, points[0], normalAngle);
+      for (let i=0; i < points2d.length; i++) {
+        const current = points2d[i];
+        const next = points2d[(i+1) % points2d.length];
+        const calc = (point2d.x - current.x) * (next.y - current.y) - (next.x - current.x) * (point2d.y - current.y);
+        const calcSign = Math.sign(calc);
+        if (sign === 0) {
+          sign = calcSign;
+        } else {
+          if (calcSign !== sign && calcSign !== 0) {
+            return false;
+          }
+        }
+      }
+      return true;
     }
-    // Draw the normal
-    _r.color(1, 0, 0, 1);
-    scene.drawLine(this.points[0], this.points[0].add(this.normal.multiply(this.ball.size / 2)));
-    // Draw the adjusted plane points
-    _r.color(1, 0, 0, 1);
-    // for (let i=0; i < this.offsetPoints.length - 1; i++) {
-    //   scene.drawLine(this.offsetPoints[i], this.offsetPoints[i+1]);
-    // }
-    // if (this.offsetPoints.length > 2) {
-    //   scene.drawLine(this.offsetPoints[0], this.offsetPoints[this.offsetPoints.length-1]);
-    // }
+    const oldDebugDraw = collider.debugDraw.bind(collider);
+    collider.debugDraw = (scene) => {
+      oldDebugDraw(scene);
+      _r.color(1, 1, 1, 1);
+      for (let i=0; i < points.length; i++) {
+        const current = points[i];
+        const next = points[(i+1) % points.length];
+        scene.drawLine(current, next);
+      }
+      _r.color(1, 0, 0, 0.5);
+      const offset = collider.normal.multiply(collider.ball.size);
+      for (let i=0; i < points.length; i++) {
+        const current = points[i];
+        const next = points[(i+1) % points.length];
+        scene.drawLine(current.add(offset), next.add(offset));
+      }
+    }
+    return collider;
   }
 }

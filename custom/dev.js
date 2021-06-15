@@ -5,32 +5,125 @@ SCENE.camera.position.z = -10;
 SCENE.camera.position.y = -5;
 
 const PHYSICS = new PhysicsWorld();
+PHYSICS.paused = true;
 const BALL = new PhysicsBall();
-BALL.position = new Vector(5, 3.5, 3.5);
-BALL.velocity = new Vector(0, -1, 0);
+BALL.position = new Vector(2, -2.5, 6);
+BALL.velocity = new Vector(4, 0, -20);
 BALL.size = 0.5;
 PHYSICS.ball = BALL;
-PHYSICS.addCollider(new PlaneCollider(
-  new Vector(0, 0, 0),
-  new Vector(10, 0 , 0),
-  new Vector(10, 5, 10),
-  new Vector(0, 5, 10),
+// PHYSICS.addCollider(new PlaneCollider(
+//   new Vector(0, -5, 0),
+//   new Vector(10, -5 , 0),
+//   new Vector(10, 5, 10),
+//   new Vector(0, 5, 10),
+//   true
+// ));
+// PHYSICS.addCollider(new PlaneCollider(
+//   new Vector(0, 0, 0),
+//   new Angle(-90, 0, 0).getForward()
+// ));
+// PHYSICS.addCollider(new PlaneCollider(
+//   new Vector(0, 0, -2),
+//   new Angle(-45, 0, 0).getForward()
+// ));
+// PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+//   [new Vector(0, 0, 0),
+//   new Vector(5, 0, 0),
+//   new Vector(5, 0, 5),
+//   new Vector(0, 0, 5)],
+//   true
+// ));
+// PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+//   [new Vector(0, 0, 0),
+//   new Vector(5, 0, 0),
+//   new Vector(5, 0.05, -0.2),
+//   new Vector(0, 0.05, -0.2)],
+//   false
+// ));
+// PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+//   [new Vector(0, 0.05, -0.2),
+//   new Vector(5, 0.05, -0.2),
+//   new Vector(5, 0.3, -2),
+//   new Vector(0, 0.3, -2)],
+//   false
+// ));
+
+const steps = 10;
+const radius = 3;
+const width = 5;
+const points = [];
+for (let i=0; i <= steps; i++) {
+  const angle = util.toRadians((i/steps) * 360 + 180);
+  const z = Math.sin(angle) * radius;
+  const y = Math.cos(angle) * radius;
+  points.push(new Vector((i/steps) * width, y, z));
+}
+for (let i=0; i < points.length-1; i++) {
+  PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+    [points[i],
+    points[i].add(new Vector(width, 0, 0)),
+    points[i+1].add(new Vector(width, 0, 0)),
+    points[i+1]],
+    false
+  ));
+}
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(0, -radius, 0),
+  new Vector(width, -radius, 0),
+  new Vector(width, -radius, 10),
+  new Vector(0, -radius, 10)],
   true
 ));
-PHYSICS.addCollider(new PlaneCollider(
-  new Vector(0, 5, 0),
-  new Vector(10, 5 , 0),
-  new Vector(10, 5, 10),
-  new Vector(0, 5, 10),
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(width, -radius, 0),
+  new Vector(width*2, -radius, 0),
+  new Vector(width*2, -radius, -10),
+  new Vector(width, -radius, -10)],
   false
 ));
-PHYSICS.addCollider(new PlaneCollider(
-  new Vector(0, 0, 0),
-  new Vector(10, 0, 0),
-  new Vector(10, 5, 0),
-  new Vector(0, 5, 0),
-  false
-));
+// PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+//   new Vector(0, 0.3, -0.5),
+//   new Vector(5, 0.3, -0.5),
+//   new Vector(5, 0.3, -1.5),
+//   new Vector(0, 0.3, -1.5),
+//   false
+// ));
+// PHYSICS.addCollider(new PlaneCollider(
+//   new Vector(0, -5, 0),
+//   new Vector(10, -5, 0),
+//   new Vector(10, 5, 0),
+//   new Vector(0, 5, 0),
+//   false
+// ));
+
+const test = new Matrix(4, 4);
+test[0][0] = 1;
+test[0][1] = 2;
+test[0][2] = 3;
+test[0][3] = -4;
+test[1][0] = 2;
+test[1][1] = 1;
+test[1][2] = 2;
+test[1][3] = 3;
+test[2][0] = 3;
+test[2][1] = 2;
+test[2][2] = 1;
+test[2][3] = 2;
+test[3][0] = 4;
+test[3][1] = 3;
+test[3][2] = 2;
+test[3][3] = 1;
+
+print(test.invert());
+
+// const origin = new Vector(1, 2, 3);
+// const point = new Vector(1, 2, 6);
+// const angle = new Angle(0, 0, 0);
+// print(util.worldToLocal(point, angle, origin, angle));
+
+const ang = new Angle(-95, -45, 0).getForward();
+print(ang);
+print(ang.asAngle());
 
 const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
 BALL_MODEL.scale = new Vector(BALL.size, BALL.size, BALL.size);
@@ -39,10 +132,12 @@ SCENE.addModel(BALL_MODEL);
 
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
+cube.position.z = -10;
 SCENE.addModel(cube);
 
 const monkey = ModelCache.newModel("DEBUG_Monkey");
 monkey.position.x = 3;
+monkey.position.z = -10;
 monkey.rotation.pitch = 90;
 monkey.calcColour = (tri) => {
   const normal = util.findNormal(tri.worldVerts).invert();
@@ -148,6 +243,21 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   _r.layer = 0;
   SCENE.draw();
   PHYSICS.debugDraw(SCENE);
+
+
+  // _r.color(1, 1, 0, 0.5);
+  // const start = new Vector(0, 0, 0);
+  // const normal = new Angle(-45, 45, 0);
+  // const sameNormal = new Vector(1, 1, 1).normalize();
+  // print(normal.getForward());
+  // print(sameNormal);
+  // // print(normal);
+  // // print(sameNormal.asAngle());
+  // _r.color(1, 1, 1, 1);
+  // SCENE.drawPoint(start, 10);
+  // SCENE.drawLine(start, start.add(normal.getForward().multiply(2)));
+  // _r.color(1, 0, 0, 1);
+  // SCENE.drawLine(start, start.add(sameNormal.asAngle().getForward()));
 
   // CAMERA.updateMatrix();
 
