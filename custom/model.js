@@ -128,17 +128,17 @@ class Model {
       new Vector(1, -1, -1),
     ];
     const top = new Face([1, 0, 3, 2], [1, 0, 0, 1]);
-    top.flipNormal = true;
+    // top.flipNormal = true;
     const bottom = new Face([4, 5, 6, 7], [0, 1, 1, 1]);
-    bottom.flipNormal = true;
+    // bottom.flipNormal = true;
     const front = new Face([2, 3, 7, 6], [0, 0, 1, 1]);
-    front.flipNormal = true;
+    // front.flipNormal = true;
     const back = new Face([0, 1, 5, 4], [1, 1, 0, 1]);
-    back.flipNormal = true;
+    // back.flipNormal = true;
     const left = new Face([1, 2, 6, 5], [0, 1, 0, 1]);
-    left.flipNormal = true;
+    // left.flipNormal = true;
     const right = new Face([3, 0, 4, 7], [1, 0, 1, 1]);
-    right.flipNormal = true;
+    // right.flipNormal = true;
 
     const model = new Model();
     model.verts = points;

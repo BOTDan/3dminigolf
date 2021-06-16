@@ -85,7 +85,7 @@ function generateModel(parsedData) {
   model.verts = parsedData.vertex;
   parsedData.face.forEach(verts => {
     const face = new Face(verts);
-    face.flipNormal = true;
+    face.flipNormal = false;
     model.addFace(face);
   });
   return model;
