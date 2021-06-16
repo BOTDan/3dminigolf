@@ -7,9 +7,9 @@ SCENE.camera.position.y = -5;
 const PHYSICS = new PhysicsWorld();
 PHYSICS.paused = true;
 const BALL = new PhysicsBall();
-BALL.position = new Vector(2, -2.5, 6);
-BALL.velocity = new Vector(4, 0, -20);
-BALL.size = 0.5;
+BALL.position = new Vector(0, 0.11, 5);
+BALL.velocity = new Vector(1.82, 0, 0);
+BALL.size = 0.04;
 PHYSICS.ball = BALL;
 // PHYSICS.addCollider(new PlaneCollider(
 //   new Vector(0, -5, 0),
@@ -80,6 +80,36 @@ PHYSICS.addCollider(PlaneCollider.Quadrilateral(
   new Vector(width*2, -radius, -10),
   new Vector(width, -radius, -10)],
   false
+));
+// End Plates
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(width, -radius, -10),
+  new Vector(width*2, -radius, -10),
+  new Vector(width*2, -radius+2, -10),
+  new Vector(width, -radius+2, -10)],
+  false
+));
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(width, -radius, 10),
+  new Vector(0, -radius, 10),
+  new Vector(0, -radius+2, 10),
+  new Vector(width, -radius+2, 10)],
+  false
+));
+// Side Plates
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(width*2, -radius, -10),
+  new Vector(width*2, -radius+2, -10),
+  new Vector(width*2, -radius+2, 0),
+  new Vector(width*2, -radius, 0)],
+  true
+));
+PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  [new Vector(0, -radius, 10),
+  new Vector(0, -radius+2, 10),
+  new Vector(0, -radius+2, 0),
+  new Vector(0, -radius, 0)],
+  true
 ));
 // PHYSICS.addCollider(PlaneCollider.Quadrilateral(
 //   new Vector(0, 0.3, -0.5),
@@ -209,11 +239,16 @@ end.position = new Vector(3, 0, 5);
 end.rotation = new Angle(0, -90, 0);
 end.calcColour = flatLighting;
 
-const ball = ModelCache.newModel("MINIGOLF_Ball");
-ball.position = new Vector(0, 0.1, 5);
-ball.calcColour = flatLighting;
+// const ball = ModelCache.newModel("MINIGOLF_Ball");
+// ball.position = new Vector(0, 0.1, 5);
+// ball.calcColour = flatLighting;
 
-SCENE.addModel(start, straight1, hill, end, ball);
+SCENE.addModel(start, straight1, hill, end);
+
+physicsFromModel(start, PHYSICS);
+physicsFromModel(straight1, PHYSICS);
+physicsFromModel(hill, PHYSICS);
+physicsFromModel(end, PHYSICS);
 
 GameBase.Console.AddCommand("faces", (bool) => {
   if (isNaN(bool)) {
@@ -239,11 +274,28 @@ GameBase.Console.AddCommand("points", (bool) => {
   SCENE.drawVertices = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If vertices of triangles should be drawn.");
 
+let physDebugDraw = false;
+GameBase.Console.AddCommand("physoutline", (bool) => {
+  if (isNaN(bool)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
+  }
+  const shouldDraw = parseInt(bool);
+  physDebugDraw = (shouldDraw > 0);
+}, "(0/1) [DEBUG] If the physics system should render colliders.");
+
+GameBase.Console.AddCommand("phystimescale", (number) => {
+  if (isNaN(number)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be a number` ] );
+  }
+  PHYSICS.timescale = number;
+}, "(0/1) [DEBUG] Sets the physics timescale (default 1)");
+
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   _r.layer = 0;
   SCENE.draw();
-  PHYSICS.debugDraw(SCENE);
-
+  if (physDebugDraw) {
+    PHYSICS.debugDraw(SCENE);
+  }
 
   // _r.color(1, 1, 0, 0.5);
   // const start = new Vector(0, 0, 0);
