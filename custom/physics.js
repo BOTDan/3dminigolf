@@ -12,7 +12,6 @@ class PhysicsWorld {
     this.gravityStrength = 7;
     this.timescale = 1;
     this.paused = false;
-    this._debugDraw = [];
   }
 
   get colliders() { return this._colliders; }
@@ -110,23 +109,6 @@ class PhysicsWorld {
       collider.debugDraw(scene);
     });
     this.ball.debugDraw(scene);
-    this._debugDraw.forEach((obj) => {
-      if (obj.colour) {
-        _r.color(...obj.colour);
-      } else {
-        _r.color(1, 0, 0, 1);
-      }
-      switch(obj.type) {
-        case 'point': {
-          scene.drawPoint(obj.pos, 10);
-          break;
-        }
-        case 'line': {
-          scene.drawLine(obj.startPos, obj.endPos, 2);
-          break;
-        }
-      }
-    });
   }
 }
 
@@ -277,9 +259,6 @@ class PlaneCollider extends PhysicsCollider {
     if (!this.isValidCollision(hitData.point, hitData.distance)) {
       return null;
     }
-    // print(util.worldToLocal(hitData.point, new Angle(0, 0, 0), this.offsetPosition, this.normal.asAngle().getRight().asAngle()));
-    // util.test(hitData.point, this.normal.asAngle().getRight(), this.normal.asAngle().getUp());
-    // print(util.pointToPlane(hitData.point, this.offsetPosition, this.normal.asAngle()));
     return new PhysicsCollision(this, hitData.point, hitData.distance, this.normal);
   }
 
