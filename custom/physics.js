@@ -346,3 +346,21 @@ class PlaneCollider extends PhysicsCollider {
     return collider;
   }
 }
+
+/**
+ * Generates collisions for the given model and adds it to the world if provided
+ * @param {Model} model The model to add physics to
+ * @param {PhysicsWorld} physWorld The world to add the collision to
+ */
+function physicsFromModel(model, physWorld) {
+  model.updateWorldVerts();
+  const colliders = model.faces.map((face) => {
+    const verts = face.verts.map((vert) => model.worldVerts[vert]);
+    const collider = PlaneCollider.Quadrilateral(verts, face.flipNormal);
+    if (physWorld) {
+      physWorld.addCollider(collider);
+    }
+    return collider;
+  });
+  return colliders;
+}
