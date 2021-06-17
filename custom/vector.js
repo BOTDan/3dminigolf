@@ -18,10 +18,17 @@ class Vector {
     get x() { return this._x; }
     get y() { return this._y; }
     get z() { return this._z; }
+    get len() { return this.length(); }
 
     set x(value) { this._x = value; }
     set y(value) { this._y = value; }
     set z(value) { this._z = value; }
+    set len(value) {
+        const normal = this.normalize();
+        this.x = normal.x * value;
+        this.y = normal.y * value;
+        this.z = normal.z * value;
+    }
 
     /**
      * Adds a number/vector to this vector
