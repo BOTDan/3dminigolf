@@ -123,6 +123,20 @@ class Matrix extends Array {
     }
 
     /**
+     * Transposes this matrix
+     * @returns {Matrix} The transposed version of this matrix
+     */
+    transpose() {
+        const out = new Matrix(this[0].length, this.length);
+        for (let i=0; i<this.length; i++) {
+            for (let j=0; j<this[i].length; j++) {
+                out[j][i] = this[i][j];
+            }
+        }
+        return out;
+    }
+
+    /**
      * Returns the content of this matrix as a string for printing
      */
     toString() {
