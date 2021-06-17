@@ -55,8 +55,8 @@ class Camera {
    * @returns {Matrix} A transformation matrix
    */
   getTransformationMatrix() {
-    const translationMatrix = this.position.getTranslationMatrix();
-    const rotationMatrix = this.rotation.getRotationMatrix();
+    const translationMatrix = this.position.invert().getTranslationMatrix();
+    const rotationMatrix = this.rotation.invert().getRotationMatrix();
     const transformationMatrix = translationMatrix.multiply(rotationMatrix);
     return transformationMatrix;
   }
