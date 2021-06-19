@@ -1,14 +1,20 @@
 GameBase.Debug.ShowFPS = true;
 
 const SCENE = new Scene();
-SCENE.camera.position.z = -10;
-SCENE.camera.position.y = -5;
+SCENE.camera.position.z = 0;
+SCENE.camera.position.y = 0.2;
+
+const CAMERA_SETTINGS = {
+  attached: false,
+  distance: 1,
+  angle: new Angle(45, 45, 0),
+}
 
 const PHYSICS = new PhysicsWorld();
 PHYSICS.paused = true;
 const BALL = new PhysicsBall();
 BALL.position = new Vector(0, 0.11, 5);
-BALL.velocity = new Vector(1.82, 0, 0);
+BALL.velocity = new Vector(1.275, 0, 0);
 BALL.size = 0.04;
 PHYSICS.ball = BALL;
 // PHYSICS.addCollider(new PlaneCollider(
@@ -59,7 +65,7 @@ for (let i=0; i <= steps; i++) {
   points.push(new Vector((i/steps) * width, y, z));
 }
 for (let i=0; i < points.length-1; i++) {
-  PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+  PHYSICS.addCollider(PlaneCollider.Polygon(
     [points[i],
     points[i].add(new Vector(width, 0, 0)),
     points[i+1].add(new Vector(width, 0, 0)),
@@ -67,14 +73,14 @@ for (let i=0; i < points.length-1; i++) {
     false
   ));
 }
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(0, -radius, 0),
   new Vector(width, -radius, 0),
   new Vector(width, -radius, 10),
   new Vector(0, -radius, 10)],
   true
 ));
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(width, -radius, 0),
   new Vector(width*2, -radius, 0),
   new Vector(width*2, -radius, -10),
@@ -82,14 +88,14 @@ PHYSICS.addCollider(PlaneCollider.Quadrilateral(
   false
 ));
 // End Plates
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(width, -radius, -10),
   new Vector(width*2, -radius, -10),
   new Vector(width*2, -radius+2, -10),
   new Vector(width, -radius+2, -10)],
   false
 ));
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(width, -radius, 10),
   new Vector(0, -radius, 10),
   new Vector(0, -radius+2, 10),
@@ -97,14 +103,14 @@ PHYSICS.addCollider(PlaneCollider.Quadrilateral(
   false
 ));
 // Side Plates
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(width*2, -radius, -10),
   new Vector(width*2, -radius+2, -10),
   new Vector(width*2, -radius+2, 0),
   new Vector(width*2, -radius, 0)],
   true
 ));
-PHYSICS.addCollider(PlaneCollider.Quadrilateral(
+PHYSICS.addCollider(PlaneCollider.Polygon(
   [new Vector(0, -radius, 10),
   new Vector(0, -radius+2, 10),
   new Vector(0, -radius+2, 0),
@@ -290,12 +296,47 @@ GameBase.Console.AddCommand("phystimescale", (number) => {
   PHYSICS.timescale = number;
 }, "(0/1) [DEBUG] Sets the physics timescale (default 1)");
 
+const debugPoints = [];
+GameBase.Console.AddCommand("debugpoint", (x, y, z) => {
+  if (isNaN(x)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument 1 must be a number` ] );
+    return;
+  }
+  if (isNaN(y)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument 2 must be a number` ] );
+    return;
+  }
+  if (isNaN(z)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument 3 must be a number` ] );
+    return;
+  }
+  const v = new Vector(
+    parseFloat(x),
+    parseFloat(y),
+    parseFloat(z)
+  );
+  debugPoints.push(v);
+});
+
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
+  drawBallPos();
   _r.layer = 0;
+  const dirAway = CAMERA_SETTINGS.angle.getForward().multiply(CAMERA_SETTINGS.distance).invert();
+  const camPos = BALL.position.add(dirAway);
+  if (CAMERA_SETTINGS.attached) {
+    SCENE.camera.position = camPos;
+    SCENE.camera.rotation = CAMERA_SETTINGS.angle;
+  }
+  // print(SCENE.camera.rotation);
   SCENE.draw();
   if (physDebugDraw) {
     PHYSICS.debugDraw(SCENE);
   }
+
+  _r.color(0, 1, 0, 1);
+  debugPoints.forEach((point) => {
+    SCENE.drawPoint(point, 5);
+  })
 
   // _r.color(1, 1, 0, 0.5);
   // const start = new Vector(0, 0, 0);
@@ -379,6 +420,12 @@ function drawTriangleCount(count) {
   GameBase.Text.DrawText(0, 30, `${count} Triangles`);
 }
 
+function drawBallPos() {
+  GameBase.Debug.AddOverlay(`Ball X: ${BALL.position.x}`, [0, 1, 0, 1]);
+  GameBase.Debug.AddOverlay(`Ball Y: ${BALL.position.y}`, [0, 1, 0, 1]);
+  GameBase.Debug.AddOverlay(`Ball Z: ${BALL.position.z}`, [0, 1, 0, 1]);
+}
+
 GameBase.Hooks.Add("Think", "test_key_hook", (time, dt) => {
   let forward = 0;
   let right = 0;
@@ -426,6 +473,10 @@ GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
       PHYSICS.paused = !PHYSICS.paused;
       break;
     }
+    case "KP_0": {
+      CAMERA_SETTINGS.attached = !CAMERA_SETTINGS.attached;
+      break;
+    }
   }
 });
 
@@ -441,11 +492,20 @@ GameBase.Hooks.Add("OnMouseReleased", "h", () => {
 GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) => {
   if (dragging) {
     if (GameBase.IsKeyDown("LEFT_ALT")) {
-      SCENE.camera.rotation.roll -= dx*0.1;
-      SCENE.camera.fov += dy*0.1;
+      if (CAMERA_SETTINGS.attached) {
+        CAMERA_SETTINGS.distance += dy*0.001;
+      } else {
+        SCENE.camera.rotation.roll += dx*0.1;
+        SCENE.camera.fov += dy*0.1;
+      }
     } else {
-      SCENE.camera.rotation.pitch -= dy*0.1;
-      SCENE.camera.rotation.yaw -= dx*0.1;
+      if (CAMERA_SETTINGS.attached) {
+        CAMERA_SETTINGS.angle.pitch += dy*0.1;
+        CAMERA_SETTINGS.angle.yaw -= dx*0.1;
+      } else {
+        SCENE.camera.rotation.pitch += dy*0.1;
+        SCENE.camera.rotation.yaw -= dx*0.1;
+      }
     }
   }
 });

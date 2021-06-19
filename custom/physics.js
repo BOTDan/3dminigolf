@@ -54,8 +54,8 @@ class PhysicsWorld {
     let nextCollision = this.findNextCollision(remainingDistance);
     while (nextCollision) {
       this.processCollision(nextCollision);
-      remainingDistance -= nextCollision.distance;
-      nextCollision = this.findNextCollision(remainingDistance);
+      remainingDistance -= Math.sqrt(nextCollision.distanceSqr);
+      nextCollision = this.findNextCollision(remainingDistance, nextCollision.collider);
     }
     // No more collisions, move to the end of the line
     const remainingVelocity = this.ball.velocity.normalize().multiply(remainingDistance);
@@ -67,20 +67,21 @@ class PhysicsWorld {
    * @param {Number} distance The distance the collision must be within
    * @returns {Collision || null} The next nearest collision in range
    */
-  findNextCollision(distance) {
+  findNextCollision(distance, ignore=null) {
     let nearestCollision = null;
     this.colliders.forEach((collider) => {
+      if (collider === ignore) { return; }
       const collision = collider.calcCollision();
       if (!collision) { return; }
       if (!nearestCollision) {
         nearestCollision = collision;
         return;
       }
-      if (collision.distance < nearestCollision.distance) {
+      if (collision.distanceSqr < nearestCollision.distanceSqr) {
         nearestCollision = collision;
       }
     });
-    if (!nearestCollision || nearestCollision.distance > distance) {
+    if (!nearestCollision || nearestCollision.distanceSqr > distance*distance) {
       // No collisions, move to end and finish
       return null;
     }
@@ -92,8 +93,13 @@ class PhysicsWorld {
    * @param {Collision} collision The collision to process
    */
   processCollision(collision) {
-    this.ball.position = collision.position;
+    this.ball.position = collision.position.add(collision.normal.multiply(0.001));
     this.ball.velocity = this.ball.velocity.reflect(collision.normal);
+    const amount = collision.normal.dot(this.ball.velocity);
+    const impact = collision.normal.multiply(amount * 0.5);
+    this.ball.velocity.x = mathMaxWithSign(this.ball.velocity.x - impact.x, 0);
+    this.ball.velocity.y = mathMaxWithSign(this.ball.velocity.y - impact.y, 0);
+    this.ball.velocity.z = mathMaxWithSign(this.ball.velocity.z - impact.z, 0);
   }
 
   applyGravity(dt) {
@@ -117,21 +123,21 @@ class PhysicsWorld {
  * @classdesc Represents a collision. Created by Colliders
  */
 class PhysicsCollision {
-  constructor(collider, position, distance, normal) {
+  constructor(collider, position, distanceSqr, normal) {
     this.collider = collider;
     this.position = position;
-    this.distance = distance;
+    this.distanceSqr = distanceSqr;
     this.normal = normal;
   }
 
   set collider(value) { this._collider = value; }
   set position(value) { this._position = value; }
-  set distance(value) { this._distance = value; }
+  set distanceSqr(value) { this._distance = value; }
   set normal(value) { this._normal = value; }
 
   get collider() { return this._collider; }
   get position() { return this._position; }
-  get distance() { return this._distance; }
+  get distanceSqr() { return this._distance; }
   get normal() { return this._normal; }
 }
 
@@ -173,6 +179,7 @@ class PhysicsBall {
   }
 }
 
+let physDebugCounter = 0;
 /**
  * @class
  * @classdesc A generic collider. Should be extended
@@ -183,7 +190,22 @@ class PhysicsCollider {
 
   set ball(value) {
     this._ball = value;
-    this.calcOffsetPosition();
+    this.onBallUpdated();
+  }
+
+  /**
+   * Creates a new physics collider
+   */
+  constructor() {
+    this._debugId = physDebugCounter;
+    physDebugCounter++;
+  }
+
+  /**
+   * OVERWRITE: Called when the ball is changed for this collider
+   */
+  onBallUpdated() {
+    return;
   }
 
   /**
@@ -235,7 +257,7 @@ class PlaneCollider extends PhysicsCollider {
   /**
    * Pre-calculates offset points
    */
-   calcOffsetPosition() {
+  onBallUpdated() {
     this._offsetPosition = this.position.add(this.normal.multiply(this.ball.size));
   }
 
@@ -259,7 +281,7 @@ class PlaneCollider extends PhysicsCollider {
     if (!this.isValidCollision(hitData.point, hitData.distance)) {
       return null;
     }
-    return new PhysicsCollision(this, hitData.point, hitData.distance, this.normal);
+    return new PhysicsCollision(this, hitData.point, Math.pow(hitData.distance, 2), this.normal);
   }
 
   /**
@@ -293,13 +315,12 @@ class PlaneCollider extends PhysicsCollider {
 
   /**
    * Creates a plane collider with edges between the 4 points
-   * @param {Vector} point1 The first point
-   * @param {Vector} point2 The second point
-   * @param {Vector} point3 The third point
-   * @param {Vector} point4 The forth point
+   * @param {Vector[]} points The points on the polygon
+   * @param {Boolean} flipNormal If the normal of the polygon should be flipped
    * @returns {PlaneCollider} A plane collider with bouds of the 4 points
    */
-  static Quadrilateral(points, flipNormal) {
+  static Polygon(points, flipNormal) {
+    // Get the normal of the plane
     let normal = util.findNormal(points);
     if (!normal) { return null; }
     if (flipNormal) {
@@ -308,6 +329,7 @@ class PlaneCollider extends PhysicsCollider {
     const collider = new PlaneCollider(points[0], normal);
     const normalAngle = normal.asAngle();
     const points2d = points.map((point) => {return util.pointToPlane(point, points[0], normalAngle)});
+    // Overwrite isValidCollision check to make sure collision is within edges of quad
     collider.isValidCollision = (point, distance) => {
       let sign = 0;
       const point2d = util.pointToPlane(point, points[0], normalAngle);
@@ -326,15 +348,18 @@ class PlaneCollider extends PhysicsCollider {
       }
       return true;
     }
+    // Overwrite the debugDraw to show the outline of the plane
     const oldDebugDraw = collider.debugDraw.bind(collider);
     collider.debugDraw = (scene) => {
       oldDebugDraw(scene);
+      // Draw default points
       _r.color(1, 1, 1, 1);
       for (let i=0; i < points.length; i++) {
         const current = points[i];
         const next = points[(i+1) % points.length];
         scene.drawLine(current, next);
       }
+      // Draw offset points
       _r.color(1, 0, 0, 0.5);
       const offset = collider.normal.multiply(collider.ball.size);
       for (let i=0; i < points.length; i++) {
@@ -348,6 +373,91 @@ class PlaneCollider extends PhysicsCollider {
 }
 
 /**
+ * @class
+ * @classdesc A collider representing part of a cylinder in 3d space
+ */
+class CylinderCollider extends PhysicsCollider {
+  /**
+   * Creates a new Cylinder collider from startPos to endPos with radius r
+   * @param {Vector} startPos The start position of the cylinder
+   * @param {Vector} endPos The end position of the cylinder
+   * @param {Number} radius The radius of the cylinder
+   */
+  constructor(startPos, endPos, radius=0) {
+    super();
+    this.startPos = startPos;
+    this.endPos = endPos;
+    this.radius = radius;
+    this.calcMatricies();
+  }
+
+  get startPos() { return this._startPos; }
+  get endPos() { return this._endPos; }
+  get radius() { return this._radius; }
+  get transformationMatrix() { return this._transformationMatrix; }
+  get inverseTransformationMatrix() { return this._inverseTransformationMatrix; }
+
+  set startPos(value) { this._startPos = value; }
+  set endPos(value) { this._endPos = value; }
+  set radius(value) { this._radius = value; }
+
+  /**
+   * Pre-calculates the transformation matricies needed for calculations
+   */
+  calcMatricies() {
+    const normal = this.startPos.subtract(this.endPos).normalize();
+    const translationMatrix = this.startPos.invert().getTranslationMatrix();
+    const rotationMatrix = normal.asAngle().getRotationMatrix();
+    this._transformationMatrix = translationMatrix.multiply(rotationMatrix);
+  }
+
+  /**
+   * Works out where the ball would cross the cylinder
+   * @returns {PhysicsCollision} Collision data
+   */
+  calcCollision() {
+    const ballStart = this.ball.position;
+    const ballEnd = this.ball.position.add(this.ball.velocity);
+    const transformedBallStart = ballStart.multiplyMatrix(this.transformationMatrix);
+    const transformedBallEnd = ballEnd.multiplyMatrix(this.transformationMatrix);
+    const radius = this.radius + this.ball.size;
+    // Find where line crosses circle
+    const results = lineIntersectCircle(transformedBallStart, transformedBallEnd, radius);
+    const points = results.map((result) => {
+      const point = this.ball.position.add(ballEnd.subtract(ballStart).multiply(result));
+      return point;
+    });
+    // If no points, return null
+    if (points.length === 0) {
+      return null;
+    }
+    // Get the closest point
+    const point = (points.length === 1)
+      ? points[0]
+      : (this.ball.position.distanceSqr(points[0]) < this.ball.position.distanceSqr(points[1]))
+        ? points[0]
+        : points[1];
+    // Find the normal of the collision
+    const normalStart = util.closestPointOnLine(point, this.startPos, this.endPos, true);
+    if (!normalStart) {
+      return null;
+    }
+    const normal = point.subtract(normalStart).normalize();
+    const distance = this.ball.position.distanceSqr(point);
+    return new PhysicsCollision(this, point, distance, normal);
+  }
+
+  /**
+   * Debug draw function
+   * @param {Scene} scene The scene, for rendering
+   */
+  debugDraw(scene) {
+    _r.color(1, 1, 0, 1);
+    scene.drawLine(this.startPos, this.endPos);
+  }
+}
+
+/**
  * Generates collisions for the given model and adds it to the world if provided
  * @param {Model} model The model to add physics to
  * @param {PhysicsWorld} physWorld The world to add the collision to
@@ -356,11 +466,66 @@ function physicsFromModel(model, physWorld) {
   model.updateWorldVerts();
   const colliders = model.faces.map((face) => {
     const verts = face.verts.map((vert) => model.worldVerts[vert]);
-    const collider = PlaneCollider.Quadrilateral(verts, face.flipNormal);
+    const collider = PlaneCollider.Polygon(verts, face.flipNormal);
     if (physWorld) {
       physWorld.addCollider(collider);
     }
+    for (let i=0; i < verts.length; i++) {
+      const current = verts[i];
+      const next = verts[(i+1) % verts.length];
+      const edgeCollider = new CylinderCollider(current, next);
+      if (physWorld) {
+        physWorld.addCollider(edgeCollider);
+      }
+    }
+    
     return collider;
   });
   return colliders;
+}
+
+/**
+ * Similar to Math.max but keeps the sign of the first number
+ * @param {Number} number 
+ * @param {Number} max
+ * @returns 
+ */
+function mathMaxWithSign(number, max) {
+  if (Math.sign(number) < 0) {
+    return Math.min(number, -max);
+  }
+  return Math.max(number, max);
+}
+
+/**
+ * Returns the distances along the given line where it crosses a circle at (0,0) with radius r
+ * @param {Vector} lineStart The start of the line
+ * @param {Vector} lineEnd The end of the line
+ * @param {Number} radius The radius of the circle
+ * @returns {Number[]} The distances along line where the intersections occur
+ */
+function lineIntersectCircle(lineStart, lineEnd, radius) {
+  const a = lineStart.copy();
+  const b = lineEnd.copy();
+  a.z = 0;
+  b.z = 0;
+  const diff = a.subtract(b);
+  const diffLenSqr = diff.lengthSqr();
+  const t = a.dot(diff) / diffLenSqr;
+  const distSqr = a.lengthSqr() - t*t * diffLenSqr;
+  if (distSqr > radius*radius) {
+    // Distance > radius, so no intersection
+    return [];
+  }
+  const k = Math.sqrt((radius*radius - distSqr) / diffLenSqr);
+  const results = [];
+  // Check if the positive result is valid (between 0-1)
+  if (t+k >= 0 && t+k <= 1) {
+    results.push(t+k);
+  }
+  // Check if the negative result is valid (between 0-1)
+  if (t-k >= 0 && t-k <= 1) {
+    results.push(t-k);
+  }
+  return results;
 }
