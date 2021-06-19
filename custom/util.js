@@ -67,4 +67,23 @@ const util = {
     const y = planeAngle.getUp().dot(point);
     return new Vector(x - originX, y - originY, 0);
   },
+
+  /**
+   * Returns a closest point along the given line to the given point
+   * @param {Vector} point The point
+   * @param {Vector} lineStart The start position of the line
+   * @param {Vector} lineEnd The end position of the line
+   * @returns {Vector} The closest point
+   */
+  closestPointOnLine(point, lineStart, lineEnd, mustContain=false) {
+    const lineDir = lineEnd.subtract(lineStart).normalize();
+    const v = point.subtract(lineStart);
+    const t = lineDir.dot(v);
+    const len = lineStart.distanceSqr(lineEnd);
+    if (mustContain && (t<0 || (t*t) > len)) {
+      return null;
+    }
+    const nearestPoint = lineStart.add(lineDir.multiply(t));
+    return nearestPoint;
+  },
 }
