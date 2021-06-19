@@ -166,6 +166,24 @@ class Vector {
     }
 
     /**
+     * Returns the squared distance to the given point
+     * @param {Vector} to The vector to get the distance to
+     * @returns {Number} The squared distance to the given point
+     */
+    distanceSqr(to) {
+        return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2) + Math.pow(to.z - this.z, 2);
+    }
+
+    /**
+     * Returns the distance to the given point
+     * @param {Vector} to The vector to get the distance to
+     * @returns {Number} The distance to the given point
+     */
+    distance(to) {
+        return Math.sqrt(this.distanceSqr(to));
+    }
+
+    /**
      * Returns this vector as a translation matrix
      */
     getTranslationMatrix() {
@@ -192,6 +210,18 @@ class Vector {
      */
     toString() {
         return `{x: ${this.x}, y: ${this.y}, z: ${this.z}}`;
+    }
+
+    /**
+     * Returns a copy of this vector
+     * @returns {Vector} A copy of this vector
+     */
+    copy() {
+        return new Vector(
+            this.x,
+            this.y,
+            this.z
+        );
     }
 
     /**
