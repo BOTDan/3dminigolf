@@ -225,6 +225,17 @@ class Vector {
     }
 
     /**
+     * Returns if this vector is the same as the given vector
+     * @param {Vector} vector The vector to compare to
+     * @returns {Boolean} If this vector is the same as the given vector
+     */
+    equals(vector) {
+        return (this.x === vector.x
+        && this.y === vector.y
+        && this.z === vector.z);
+    }
+
+    /**
      * Multiplies this vector by the given matrix
      * @param {Matrix} matrix The matrix to multiply by
      */
