@@ -14,7 +14,7 @@ class Camera {
     this.rotation = angles || new Angle(0, 0, 0);
     this.aspect = aspect || (_m.width/_m.height);
     this.fov = fov || 90;
-    this.near = near || 0.1;
+    this.near = near || 0.001;
     this.far = far || 100;
     this.updateMatrix();
   }
