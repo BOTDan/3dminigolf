@@ -4,19 +4,21 @@ const SCENE = new Scene();
 SCENE.camera.position.z = 0;
 SCENE.camera.position.y = 0.2;
 
-const CAMERA_SETTINGS = {
-  attached: false,
-  distance: 1,
-  angle: new Angle(45, 45, 0),
-}
-
 const PHYSICS = new PhysicsWorld();
 PHYSICS.paused = true;
-const BALL = new PhysicsBall();
-BALL.position = new Vector(0, 0.11, 5);
-BALL.velocity = new Vector(1.275, 0, 0);
-BALL.size = 0.04;
-PHYSICS.ball = BALL;
+
+const BALL_ENTITY = new BallEntity(SCENE, new Vector(8.8, -1.15, 7.23), 0.04);
+PHYSICS.ball = BALL_ENTITY.physics;
+
+// const BALL = new PhysicsBall();
+// Snake spawn pos
+// BALL.position = new Vector(8.8, -1.15, 7.23);
+// BALL.velocity = new Vector(-5, 0, -0.5);
+// // Loop spawn pos
+// // BALL.position = new Vector(0, 0.11, 10);
+// // BALL.velocity = new Vector(6, 0, 0);
+// BALL.size = 0.04;
+
 // PHYSICS.addCollider(new PlaneCollider(
 //   new Vector(0, -5, 0),
 //   new Vector(10, -5 , 0),
@@ -161,10 +163,9 @@ const ang = new Angle(-95, -45, 0).getForward();
 print(ang);
 print(ang.asAngle());
 
-const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
-BALL_MODEL.scale = new Vector(BALL.size, BALL.size, BALL.size);
-BALL_MODEL.calcColour = Model.flatLighting;
-SCENE.addModel(BALL_MODEL);
+// const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
+// BALL_MODEL.scale = new Vector(BALL.size, BALL.size, BALL.size);
+// BALL_MODEL.calcColour = Model.flatLighting;
 
 const cube = Model.Cube();
 // cube.scale.x = 0.1;
@@ -251,10 +252,28 @@ end.calcColour = flatLighting;
 
 SCENE.addModel(start, straight1, hill, end);
 
-physicsFromModel(start, PHYSICS);
-physicsFromModel(straight1, PHYSICS);
-physicsFromModel(hill, PHYSICS);
-physicsFromModel(end, PHYSICS);
+// physicsFromModel(start, PHYSICS);
+// physicsFromModel(straight1, PHYSICS);
+// physicsFromModel(hill, PHYSICS);
+// physicsFromModel(end, PHYSICS);
+
+const snayyyyke = ModelCache.newModel("DEBUG_Snake");
+snayyyyke.position = new Vector(5, -1.2, 7);
+snayyyyke.calcColour = flatLighting;
+SCENE.addModel(snayyyyke);
+
+const snayyyykePhys = ModelCache.newModel("DEBUG_Snake_Phys");
+snayyyykePhys.position = snayyyyke.position;
+
+physicsFromModel(snayyyykePhys, PHYSICS);
+
+const looooop = ModelCache.newModel("DEBUG_Loop");
+looooop.position = new Vector(0, 0, 10);
+looooop.rotation.yaw = 180;
+looooop.calcColour = flatLighting;
+SCENE.addModel(looooop);
+
+// physicsFromModel(looooop, PHYSICS);
 
 GameBase.Console.AddCommand("faces", (bool) => {
   if (isNaN(bool)) {
@@ -320,12 +339,13 @@ GameBase.Console.AddCommand("debugpoint", (x, y, z) => {
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   drawBallPos();
+  BALL_ENTITY.update();
+  drawBallPower();
+
   _r.layer = 0;
-  const dirAway = CAMERA_SETTINGS.angle.getForward().multiply(CAMERA_SETTINGS.distance).invert();
-  const camPos = BALL.position.add(dirAway);
-  if (CAMERA_SETTINGS.attached) {
-    SCENE.camera.position = camPos;
-    SCENE.camera.rotation = CAMERA_SETTINGS.angle;
+  if (BALL_ENTITY.cameraAttached) {
+    SCENE.camera.position = BALL_ENTITY.cameraPosition;
+    SCENE.camera.rotation = BALL_ENTITY.cameraAngle;
   }
   // print(SCENE.camera.rotation);
   SCENE.draw();
@@ -421,9 +441,27 @@ function drawTriangleCount(count) {
 }
 
 function drawBallPos() {
-  GameBase.Debug.AddOverlay(`Ball X: ${BALL.position.x}`, [0, 1, 0, 1]);
-  GameBase.Debug.AddOverlay(`Ball Y: ${BALL.position.y}`, [0, 1, 0, 1]);
-  GameBase.Debug.AddOverlay(`Ball Z: ${BALL.position.z}`, [0, 1, 0, 1]);
+  GameBase.Debug.AddOverlay(`Ball X: ${BALL_ENTITY.position.x}`, [0, 1, 0, 1]);
+  GameBase.Debug.AddOverlay(`Ball Y: ${BALL_ENTITY.position.y}`, [0, 1, 0, 1]);
+  GameBase.Debug.AddOverlay(`Ball Z: ${BALL_ENTITY.position.z}`, [0, 1, 0, 1]);
+}
+
+function drawBallPower() {
+  const [cursorX, cursorY] = GameBase.GetCursorPos();
+  const normal = SCENE.screenPosToLookDir(cursorX, cursorY);
+  if (normal) {
+    const hitPos = util.getLineIntersection(
+      SCENE.camera.position,
+      SCENE.camera.position.add(normal),
+      BALL_ENTITY.position,
+      new Vector(0, 1, 0)
+    );
+    if (hitPos && hitPos.distance > 0) {
+      BALL_ENTITY.aimTarget = hitPos.point;
+    } else {
+      BALL_ENTITY.aimTarget = null;
+    }
+  }
 }
 
 GameBase.Hooks.Add("Think", "test_key_hook", (time, dt) => {
@@ -451,7 +489,6 @@ GameBase.Hooks.Add("Think", "test_key_hook", (time, dt) => {
 
   PHYSICS.think(dt);
   SCENE.think();
-  BALL_MODEL.position = BALL.position;
 });
 
 GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
@@ -474,14 +511,29 @@ GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
       break;
     }
     case "KP_0": {
-      CAMERA_SETTINGS.attached = !CAMERA_SETTINGS.attached;
+      BALL_ENTITY.cameraAttached = !BALL_ENTITY.cameraAttached;
       break;
     }
   }
 });
 
 let dragging = false;
-GameBase.Hooks.Add("OnMousePressed", "h", () => {
+GameBase.Hooks.Add("OnMousePressed", "h", (x, y, button) => {
+  if (button === 0) {
+    const [cursorX, cursorY] = GameBase.GetCursorPos();
+    const normal = SCENE.screenPosToLookDir(cursorX, cursorY);
+    if (normal) {
+      const hitPos = util.getLineIntersection(
+        SCENE.camera.position,
+        SCENE.camera.position.add(normal),
+        BALL_ENTITY.position,
+        new Vector(0, 1, 0)
+      );
+      if (hitPos && hitPos.distance > 0) {
+        BALL_ENTITY.velocity = BALL_ENTITY.velocity.add(hitPos.point.subtract(BALL_ENTITY.position));
+      }
+    }
+  }
   dragging = true;
 })
 
@@ -492,16 +544,16 @@ GameBase.Hooks.Add("OnMouseReleased", "h", () => {
 GameBase.Hooks.Add("OnMouseMoved", "test_mouse_hook", (x, y, dx, dy, focused) => {
   if (dragging) {
     if (GameBase.IsKeyDown("LEFT_ALT")) {
-      if (CAMERA_SETTINGS.attached) {
-        CAMERA_SETTINGS.distance += dy*0.001;
+      if (BALL_ENTITY.cameraAttached) {
+        BALL_ENTITY.cameraDistance += dy*0.001;
       } else {
         SCENE.camera.rotation.roll += dx*0.1;
         SCENE.camera.fov += dy*0.1;
       }
     } else {
-      if (CAMERA_SETTINGS.attached) {
-        CAMERA_SETTINGS.angle.pitch += dy*0.1;
-        CAMERA_SETTINGS.angle.yaw -= dx*0.1;
+      if (BALL_ENTITY.cameraAttached) {
+        BALL_ENTITY.cameraAngle.pitch += dy*0.1;
+        BALL_ENTITY.cameraAngle.yaw -= dx*0.1;
       } else {
         SCENE.camera.rotation.pitch += dy*0.1;
         SCENE.camera.rotation.yaw -= dx*0.1;
