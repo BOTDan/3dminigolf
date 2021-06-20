@@ -351,7 +351,7 @@ class PlaneCollider extends PhysicsCollider {
     // Overwrite the debugDraw to show the outline of the plane
     const oldDebugDraw = collider.debugDraw.bind(collider);
     collider.debugDraw = (scene) => {
-      oldDebugDraw(scene);
+      // oldDebugDraw(scene);
       // Draw default points
       _r.color(1, 1, 1, 1);
       for (let i=0; i < points.length; i++) {
@@ -360,7 +360,7 @@ class PlaneCollider extends PhysicsCollider {
         scene.drawLine(current, next);
       }
       // Draw offset points
-      _r.color(1, 0, 0, 0.5);
+      _r.color(0, 1, 0, 1);
       const offset = collider.normal.multiply(collider.ball.size);
       for (let i=0; i < points.length; i++) {
         const current = points[i];
@@ -464,23 +464,32 @@ class CylinderCollider extends PhysicsCollider {
  */
 function physicsFromModel(model, physWorld) {
   model.updateWorldVerts();
-  const colliders = model.faces.map((face) => {
+  const colliders = [];
+  const edgePairs = [];
+  model.faces.forEach((face) => {
     const verts = face.verts.map((vert) => model.worldVerts[vert]);
     const collider = PlaneCollider.Polygon(verts, face.flipNormal);
-    if (physWorld) {
-      physWorld.addCollider(collider);
-    }
+    colliders.push(collider);
     for (let i=0; i < verts.length; i++) {
       const current = verts[i];
       const next = verts[(i+1) % verts.length];
-      const edgeCollider = new CylinderCollider(current, next);
-      if (physWorld) {
-        physWorld.addCollider(edgeCollider);
+      // Check that edge hasn't been made yet
+      const found = edgePairs.some(([startPos, endPos]) =>{
+        if ((startPos.equals(current) && endPos.equals(next)) || (startPos.equals(next) && endPos.equals(current))) {
+          return true;
+        }
+        return false;
+      });
+      if (!found) {
+        const edgeCollider = new CylinderCollider(current, next);
+        colliders.push(edgeCollider);
+        edgePairs.push([current, next]);
       }
     }
-    
-    return collider;
   });
+  if (physWorld) {
+    colliders.forEach((collider) => { physWorld.addCollider(collider); });
+  }
   return colliders;
 }
 
