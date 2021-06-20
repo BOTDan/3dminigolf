@@ -71,6 +71,13 @@ class Scene {
     });
   }
 
+  sort(a, b) {
+    if (a.zIndex === b.zIndex) {
+      return b.zMax - a.zMax;
+    }
+    return a.zIndex - b.zIndex;
+  }
+
   /**
    * Draws this scene to the screen
    * @param {Boolean} clip If the scene should be clipped (default true)
@@ -96,7 +103,7 @@ class Scene {
     triangles = triangles.filter((tri) => !tri.culled);
 
     // Do a depth-sort on the triangles to try make render depth accurate
-    triangles.sort((a, b) => b.zMax - a.zMax);
+    triangles.sort(this.sort);
 
     // Finally, draw the triangles
     if (clip) {

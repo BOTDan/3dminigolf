@@ -7,6 +7,9 @@ class Model {
     this.verts = [];
     this.faces = [];
 
+    this.visible = true;
+    this.zIndex = 0;
+
     this._worldVerts = [];
     this._cameraVerts = [];
   }
@@ -20,6 +23,8 @@ class Model {
   get faces() { return this._faces; }
   get worldVerts() { return this._worldVerts; }
   get cameraVerts() { return this._cameraVerts; }
+  get visible() { return this._visible; }
+  get zIndex() { return this._zIndex; }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
@@ -28,6 +33,11 @@ class Model {
   set scale(value) { this._scale = value; }
   set verts(value) { this._verts = value; }
   set faces(value) { this._faces = value; }
+  set visible(value) { this._visible = value; }
+  set zIndex(value) {
+    this._zIndex = value;
+    this.faces.forEach((face) => { face.zIndex = value; });
+  }
 
   /**
    * Adds vertices to this model
@@ -45,6 +55,7 @@ class Model {
    */
   addFace(...faces) {
     faces.forEach((face) => {
+      face.zIndex = this.zIndex;
       face.calcColour = (tri) => { return this.calcColour(tri); };
     })
     return this.faces.push(...faces);
@@ -95,6 +106,7 @@ class Model {
    * @returns {Triangle[]} A list of triangles to render
    */
   triangulate() {
+    if (!this.visible) { return []; }
     const triangles = [];
     this.faces.forEach((face) => {
       triangles.push(...face.triangulate(this._cameraVerts, this._worldVerts));
