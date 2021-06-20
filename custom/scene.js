@@ -71,6 +71,12 @@ class Scene {
     });
   }
 
+  /**
+   * Sort function used for z-sorting triangles
+   * @param {Triangle} a TThe first triangle
+   * @param {Triangle} b The second triangle
+   * @returns {Number} The order of a to b
+   */
   sort(a, b) {
     if (a.zIndex === b.zIndex) {
       return b.zMax - a.zMax;
