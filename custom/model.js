@@ -56,7 +56,7 @@ class Model {
    */
   getTransformationMatrix() {
     const translationMatrix = this.position.getTranslationMatrix();
-    const rotationMatrix = this.rotation.getRotationMatrix();
+    const rotationMatrix = this.rotation.getRotationMatrix().invert(); // Why does this need inverting??
     const scaleMatrix = this.scale.getScaleMatrix();
     return scaleMatrix.multiply(rotationMatrix).multiply(translationMatrix);
   }
