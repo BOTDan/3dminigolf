@@ -190,4 +190,27 @@ class Scene {
       _r.popclip();
     }
   }
+
+  /**
+   * Converts a point on the screen to a look direction
+   * @param {Number} x The screen x coord
+   * @param {Number} y The screen y coord
+   * @returns {Vector} A normal vector that looks at the given screen point
+   */
+  screenPosToLookDir(x, y) {
+    // Make sure point is within the scene
+    if (x < this.posX || x > this.posX + this.width) {
+      return null;
+    }
+    if (y < this.posY || y > this.posY + this.height) {
+      return null;
+    }
+    const amountX = -1 + ((x - this.posX) / this.width) * 2;
+    const amountY = -1 + (-(y - this.posY) / this.height + 1) * 2;
+    const pos = new Vector(amountX, amountY, 0);
+    const matrix = this.camera.matrix.invert();
+    const converted = pos.multiplyMatrix(matrix);
+    const normal = converted.subtract(this.camera.position).normalize();
+    return normal;
+  }
 }
