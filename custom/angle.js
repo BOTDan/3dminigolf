@@ -63,9 +63,9 @@ class Angle {
     getUp() {
         const m = this.getRotationMatrix();
         const out = new Vector();
-        out.x = - m[0][1];
-        out.y = - m[1][1];
-        out.z = - m[2][1];
+        out.x = m[0][1];
+        out.y = m[1][1];
+        out.z = m[2][1];
         return out;
     }
 
@@ -164,6 +164,18 @@ class Angle {
 
         return matrix;
     }*/
+
+    /**
+     * Inverts an angle (probably)
+     * @returns {Angle} An "inverted" version of this angle
+     */
+    invert() {
+        return new Angle(
+            -this.pitch,
+            this.yaw + 180,
+            -this.roll
+        );
+    }
 
     /**
      * Returns a string version of this vector

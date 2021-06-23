@@ -12,10 +12,11 @@ class Triangle {
    * @param {Number[]} colour Colour of the triangle
    * @param {Boolean} flipNormal If the normal for this triangle should be flipped
    */
-  constructor(vert1, vert2, vert3, colour, flipNormal) {
+  constructor(vert1, vert2, vert3, colour, flipNormal, zIndex) {
     this.verts = [vert1, vert2, vert3];
     this.colour = colour || [1, 0, 0, 1];
     this.flipNormal = flipNormal || false;
+    this.zIndex = zIndex || 0;
 
     this.worldVerts = [];
 
@@ -40,11 +41,13 @@ class Triangle {
   get screenVerts() { return this._screenVerts; }
   get culled() { return this._culled; }
   get worldVerts() { return this._worldVerts; }
+  get zIndex() { return this._zIndex; }
 
   set verts(value) { this._verts = value; }
   set colour(value) { this._colour = value; }
   set flipNormal(value) { this._flipNormal = value; }
   set worldVerts(value) { this._worldVerts = value; }
+  set zIndex(value) { this._zIndex = value; }
 
   /**
    * Internally updates the zmin, zmax and zavg. Usually called after clipping
@@ -75,7 +78,7 @@ class Triangle {
     if (normal === null) { return true; }
     if (this.flipNormal) { normal = normal.invert(); }
     this._normal = normal;
-    const dot = new Vector(0, 0, -1).dot(normal);
+    const dot = new Vector(0, 0, 1).dot(normal);
     return (dot < 0);
   }
 
@@ -95,12 +98,12 @@ class Triangle {
         return [];
       }
       // Moving from outside to inside
-      const point = util.getLineIntersection(point2, point1, planePoint, planeNormal);
+      const point = util.getLineIntersection(point2, point1, planePoint, planeNormal).point;
       return [point];
     } else {
       if (this.isPointOutsideZ(point2)) {
         // Moving from inside to outside
-        const point = util.getLineIntersection(point1, point2, planePoint, planeNormal);
+        const point = util.getLineIntersection(point1, point2, planePoint, planeNormal).point;
         return [point1, point];
       }
       // Both inside, nothing needs to be done

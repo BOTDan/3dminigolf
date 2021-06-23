@@ -218,12 +218,8 @@ function isPointOutside(point, camera) {
  * @returns {Vector} Where the line intersects the plane
  */
 function getLineIntersection(lineStart, lineEnd, planePoint = new Vector(0, 0, 0.1), planeNormal = new Vector(0, 0, 1)) {
-    const lineDirection = lineEnd.subtract(lineStart).normalize();
-    if (planeNormal.dot(lineDirection) === 0) {
-      return null;
-    }
-    const t = (planeNormal.dot(planePoint) - planeNormal.dot(lineStart)) / planeNormal.dot(lineDirection);
-    return lineStart.add(lineDirection.multiply(t));
+    const result = util.getLineIntersection(lineStart, lineEnd, planePoint, planeNormal);
+    return result.point || null;
 }
 
 /**

@@ -72,6 +72,19 @@ class Scene {
   }
 
   /**
+   * Sort function used for z-sorting triangles
+   * @param {Triangle} a TThe first triangle
+   * @param {Triangle} b The second triangle
+   * @returns {Number} The order of a to b
+   */
+  sort(a, b) {
+    if (a.zIndex === b.zIndex) {
+      return b.zMax - a.zMax;
+    }
+    return a.zIndex - b.zIndex;
+  }
+
+  /**
    * Draws this scene to the screen
    * @param {Boolean} clip If the scene should be clipped (default true)
    */
@@ -96,7 +109,7 @@ class Scene {
     triangles = triangles.filter((tri) => !tri.culled);
 
     // Do a depth-sort on the triangles to try make render depth accurate
-    triangles.sort((a, b) => b.zMax - a.zMax);
+    triangles.sort(this.sort);
 
     // Finally, draw the triangles
     if (clip) {
@@ -134,9 +147,9 @@ class Scene {
       if (points[1].z > 1 || points[1].z < 0) {
         return;
       }
-      points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1))
+      points[0] = util.getLineIntersection(points[1], points[0], new Vector(0, 0, 0), new Vector(0, 0, 1)).point
     } else if (points[1].z > 1 || points[1].z < 0) {
-      points[1] = util.getLineIntersection(points[0], points[1], new Vector(0, 0, 0), new Vector(0, 0, 1));
+      points[1] = util.getLineIntersection(points[0], points[1], new Vector(0, 0, 0), new Vector(0, 0, 1)).point;
     }
     // Convert points to screen coords
     const screenPoints = points.map((vert) => {
@@ -145,9 +158,65 @@ class Scene {
       return new Vector(this.posX + screenX, this.posY + screenY, vert.z);
     });
     // Finally, draw the line
+    if (clip) {
+      _r.pushcliprect(this.posX, this.posY, this.width, this.height);
+    }
     drawutil.line(
       screenPoints[0].x, screenPoints[0].y,
       screenPoints[1].x, screenPoints[1].y,
       width);
+    if (clip) {
+      _r.popclip();
+    }
+  }
+
+  /**
+   * Draws a point in 3D space to the screen
+   * @param {Vector} point The point
+   * @param {Number} width The width of the point
+   * @param {Boolean} clip If the point should be clipped to the scene
+   * @returns 
+   */
+  drawPoint(point, width=1, clip=true) {
+    // Convert world point to clip space
+    point = point.multiplyMatrix(this.camera.matrix);
+    if (point.z > 1 || point.z < 0) {
+      return;
+    }
+    // Convert clip space point to screen point
+    const screenX = (point.x + 1) * 0.5 * this.width;
+    const screenY = (1 - (point.y + 1) * 0.5) * this.height;
+    const screenPoint = new Vector(this.posX + screenX, this.posY + screenY, point.z);
+    // Finally, draw the point
+    if (clip) {
+      _r.pushcliprect(this.posX, this.posY, this.width, this.height);
+    }
+    _r.rect(screenPoint.x - (width/2), screenPoint.y - (width/2), width, width);
+    if (clip) {
+      _r.popclip();
+    }
+  }
+
+  /**
+   * Converts a point on the screen to a look direction
+   * @param {Number} x The screen x coord
+   * @param {Number} y The screen y coord
+   * @returns {Vector} A normal vector that looks at the given screen point
+   */
+  screenPosToLookDir(x, y) {
+    // Make sure point is within the scene
+    if (x < this.posX || x > this.posX + this.width) {
+      return null;
+    }
+    if (y < this.posY || y > this.posY + this.height) {
+      return null;
+    }
+    const amountX = -1 + ((x - this.posX) / this.width) * 2;
+    const amountY = -1 + (-(y - this.posY) / this.height + 1) * 2;
+    const pos = new Vector(amountX, amountY, 0);
+    const matrix = this.camera.matrix.invert();
+    const converted = pos.multiplyMatrix(matrix);
+    const normal = converted.subtract(this.camera.position).normalize();
+    return normal;
   }
 }

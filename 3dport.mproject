@@ -36,7 +36,9 @@
 		"1_draw": "custom/draw.js",
 		"1_scene": "custom/scene.js",
 		"2_plyparser": "custom/plyparser.js",
+		"2_physics": "custom/physics.js",
 		"3_models": "custom/models/mingolf_models.js",
+		"4_entities": "custom/entities.js",
 		"main": "custom/dev.js"
 	},
 	"textures": {

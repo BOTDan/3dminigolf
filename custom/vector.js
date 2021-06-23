@@ -18,10 +18,17 @@ class Vector {
     get x() { return this._x; }
     get y() { return this._y; }
     get z() { return this._z; }
+    get len() { return this.length(); }
 
     set x(value) { this._x = value; }
     set y(value) { this._y = value; }
     set z(value) { this._z = value; }
+    set len(value) {
+        const normal = this.normalize();
+        this.x = normal.x * value;
+        this.y = normal.y * value;
+        this.z = normal.z * value;
+    }
 
     /**
      * Adds a number/vector to this vector
@@ -151,6 +158,32 @@ class Vector {
     }
 
     /**
+     * Reflects this vector by the given normal
+     * @param {Vector} normal The normal to reflect by
+     */
+    reflect(normal) {
+        return this.subtract(normal.multiply(this.dot(normal)).multiply(2));
+    }
+
+    /**
+     * Returns the squared distance to the given point
+     * @param {Vector} to The vector to get the distance to
+     * @returns {Number} The squared distance to the given point
+     */
+    distanceSqr(to) {
+        return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2) + Math.pow(to.z - this.z, 2);
+    }
+
+    /**
+     * Returns the distance to the given point
+     * @param {Vector} to The vector to get the distance to
+     * @returns {Number} The distance to the given point
+     */
+    distance(to) {
+        return Math.sqrt(this.distanceSqr(to));
+    }
+
+    /**
      * Returns this vector as a translation matrix
      */
     getTranslationMatrix() {
@@ -180,6 +213,29 @@ class Vector {
     }
 
     /**
+     * Returns a copy of this vector
+     * @returns {Vector} A copy of this vector
+     */
+    copy() {
+        return new Vector(
+            this.x,
+            this.y,
+            this.z
+        );
+    }
+
+    /**
+     * Returns if this vector is the same as the given vector
+     * @param {Vector} vector The vector to compare to
+     * @returns {Boolean} If this vector is the same as the given vector
+     */
+    equals(vector) {
+        return (this.x === vector.x
+        && this.y === vector.y
+        && this.z === vector.z);
+    }
+
+    /**
      * Multiplies this vector by the given matrix
      * @param {Matrix} matrix The matrix to multiply by
      */
@@ -194,6 +250,18 @@ class Vector {
             out.y /= w;
             out.z /= w;
         }
+        return out;
+    }
+
+    /**
+     * Returns an angle representing this vector
+     * @returns {Angle} An angle
+     * @see Huge credit to {@link https://stackoverflow.com/a/21627251}
+     */
+    asAngle() {
+        const pitch = util.toDegrees(Math.asin(this.y));
+        const yaw = util.toDegrees(Math.atan2(this.x, this.z));
+        const out = new Angle(-pitch, yaw, 0);
         return out;
     }
 }

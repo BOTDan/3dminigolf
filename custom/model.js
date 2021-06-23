@@ -7,6 +7,9 @@ class Model {
     this.verts = [];
     this.faces = [];
 
+    this.visible = true;
+    this.zIndex = 0;
+
     this._worldVerts = [];
     this._cameraVerts = [];
   }
@@ -20,6 +23,8 @@ class Model {
   get faces() { return this._faces; }
   get worldVerts() { return this._worldVerts; }
   get cameraVerts() { return this._cameraVerts; }
+  get visible() { return this._visible; }
+  get zIndex() { return this._zIndex; }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
@@ -28,6 +33,11 @@ class Model {
   set scale(value) { this._scale = value; }
   set verts(value) { this._verts = value; }
   set faces(value) { this._faces = value; }
+  set visible(value) { this._visible = value; }
+  set zIndex(value) {
+    this._zIndex = value;
+    this.faces.forEach((face) => { face.zIndex = value; });
+  }
 
   /**
    * Adds vertices to this model
@@ -45,6 +55,7 @@ class Model {
    */
   addFace(...faces) {
     faces.forEach((face) => {
+      face.zIndex = this.zIndex;
       face.calcColour = (tri) => { return this.calcColour(tri); };
     })
     return this.faces.push(...faces);
@@ -56,7 +67,7 @@ class Model {
    */
   getTransformationMatrix() {
     const translationMatrix = this.position.getTranslationMatrix();
-    const rotationMatrix = this.rotation.getRotationMatrix();
+    const rotationMatrix = this.rotation.getRotationMatrix().invert(); // Why does this need inverting??
     const scaleMatrix = this.scale.getScaleMatrix();
     return scaleMatrix.multiply(rotationMatrix).multiply(translationMatrix);
   }
@@ -95,6 +106,7 @@ class Model {
    * @returns {Triangle[]} A list of triangles to render
    */
   triangulate() {
+    if (!this.visible) { return []; }
     const triangles = [];
     this.faces.forEach((face) => {
       triangles.push(...face.triangulate(this._cameraVerts, this._worldVerts));
@@ -128,17 +140,17 @@ class Model {
       new Vector(1, -1, -1),
     ];
     const top = new Face([1, 0, 3, 2], [1, 0, 0, 1]);
-    top.flipNormal = true;
+    // top.flipNormal = true;
     const bottom = new Face([4, 5, 6, 7], [0, 1, 1, 1]);
-    bottom.flipNormal = true;
+    // bottom.flipNormal = true;
     const front = new Face([2, 3, 7, 6], [0, 0, 1, 1]);
-    front.flipNormal = true;
+    // front.flipNormal = true;
     const back = new Face([0, 1, 5, 4], [1, 1, 0, 1]);
-    back.flipNormal = true;
+    // back.flipNormal = true;
     const left = new Face([1, 2, 6, 5], [0, 1, 0, 1]);
-    left.flipNormal = true;
+    // left.flipNormal = true;
     const right = new Face([3, 0, 4, 7], [1, 0, 1, 1]);
-    right.flipNormal = true;
+    // right.flipNormal = true;
 
     const model = new Model();
     model.verts = points;
@@ -149,5 +161,17 @@ class Model {
       this.rotation.yaw += 0.1;
     }
     return model;
+  }
+
+  /**
+   * Calculates flat lighting for a given triangle
+   * @param {Triangle} triangle The triangle to calculate light for
+   * @returns {Colour} A colour
+   */
+  static flatLighting(triangle) {
+    const normal = util.findNormal(triangle.worldVerts).invert();
+    const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+    const amountUp = (1 + amount) / 2;
+    return [amountUp, amountUp, amountUp, 1];
   }
 }
