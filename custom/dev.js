@@ -496,6 +496,9 @@ GameBase.Hooks.Add("OnKeyPressed", "", (keycode) => {
     }
     case "KP_0": {
       BALL_ENTITY.cameraAttached = !BALL_ENTITY.cameraAttached;
+      if (BALL_ENTITY.cameraAttached) {
+        BALL_ENTITY.cameraAngle = SCENE.camera.rotation;
+      }
       break;
     }
   }
