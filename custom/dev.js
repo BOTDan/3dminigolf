@@ -134,34 +134,11 @@ PHYSICS.addCollider(PlaneCollider.Polygon(
 //   false
 // ));
 
-const test = new Matrix(4, 4);
-test[0][0] = 1;
-test[0][1] = 2;
-test[0][2] = 3;
-test[0][3] = -4;
-test[1][0] = 2;
-test[1][1] = 1;
-test[1][2] = 2;
-test[1][3] = 3;
-test[2][0] = 3;
-test[2][1] = 2;
-test[2][2] = 1;
-test[2][3] = 2;
-test[3][0] = 4;
-test[3][1] = 3;
-test[3][2] = 2;
-test[3][3] = 1;
-
-print(test.invert());
-
 // const origin = new Vector(1, 2, 3);
 // const point = new Vector(1, 2, 6);
 // const angle = new Angle(0, 0, 0);
 // print(util.worldToLocal(point, angle, origin, angle));
 
-const ang = new Angle(-95, -45, 0).getForward();
-print(ang);
-print(ang.asAngle());
 
 // const BALL_MODEL = ModelCache.newModel("DEBUG_Sphere");
 // BALL_MODEL.scale = new Vector(BALL.size, BALL.size, BALL.size);
