@@ -299,21 +299,28 @@ GameBase.Console.AddCommand("points", (bool) => {
   SCENE.drawVertices = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If vertices of triangles should be drawn.");
 
-let physDebugDraw = false;
 GameBase.Console.AddCommand("physoutline", (bool) => {
   if (isNaN(bool)) {
     GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
   }
   const shouldDraw = parseInt(bool);
-  physDebugDraw = (shouldDraw > 0);
+  PHYSICS.drawColliders = (shouldDraw > 0);
 }, "(0/1) [DEBUG] If the physics system should render colliders.");
+
+GameBase.Console.AddCommand("physline", (bool) => {
+  if (isNaN(bool)) {
+    GameBase.Console.Log( [ CONSOLE_RED, `Argument must be 0/1` ] );
+  }
+  const shouldDraw = parseInt(bool);
+  PHYSICS.drawTrail = (shouldDraw > 0);
+}, "(0/1) [DEBUG] If the physics system should render a trail behind the ball.");
 
 GameBase.Console.AddCommand("phystimescale", (number) => {
   if (isNaN(number)) {
     GameBase.Console.Log( [ CONSOLE_RED, `Argument must be a number` ] );
   }
   PHYSICS.timescale = number;
-}, "(0/1) [DEBUG] Sets the physics timescale (default 1)");
+}, "(number) [DEBUG] Sets the physics timescale (default 1)");
 
 const debugPoints = [];
 GameBase.Console.AddCommand("debugpoint", (x, y, z) => {
@@ -335,7 +342,7 @@ GameBase.Console.AddCommand("debugpoint", (x, y, z) => {
     parseFloat(z)
   );
   debugPoints.push(v);
-});
+}, "(number) (number) (number) [DEBUG] Renders a point at x y z");
 
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   drawBallPos();

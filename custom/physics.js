@@ -12,6 +12,9 @@ class PhysicsWorld {
     this.gravityStrength = 7;
     this.timescale = 1;
     this.paused = false;
+    this.drawColliders = false;
+    this.drawTrail = false;
+    this._drawOps = [];
   }
 
   get colliders() { return this._colliders; }
@@ -20,6 +23,8 @@ class PhysicsWorld {
   get timescale() { return this._timescale; }
   get paused() { return this._paused; }
   get ball() { return this._ball; }
+  get drawColliders() { return this._drawColliders; }
+  get drawTrail() { return this._drawTrail; }
 
   set colliders(value) { this._colliders = value; }
   set gravityDirection(value) { this._gravityDirection = value; }
@@ -32,6 +37,8 @@ class PhysicsWorld {
       collider.ball = value;
     })
   }
+  set drawColliders(value) { this._drawColliders = value; }
+  set drawTrail(value) { this._drawTrail = value; }
   
   /**
    * Adds a physics collider to the world
@@ -59,7 +66,9 @@ class PhysicsWorld {
     }
     // No more collisions, move to the end of the line
     const remainingVelocity = this.ball.velocity.normalize().multiply(remainingDistance);
+    const oldPosition = this.ball.position;
     this.ball.position = this.ball.position.add(remainingVelocity);
+    this.addDebugDraw(new PhysicsDrawLine(oldPosition, this.ball.position));
   }
 
   /**
@@ -93,8 +102,11 @@ class PhysicsWorld {
    * @param {Collision} collision The collision to process
    */
   processCollision(collision) {
+    const oldPosition = this.ball.position;
     this.ball.position = collision.position.add(collision.normal.multiply(0.001));
     this.ball.velocity = this.ball.velocity.reflect(collision.normal);
+    this.addDebugDraw(new PhysicsDrawLine(oldPosition, this.ball.position));
+    this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(collision.normal.multiply(0.1)), [1, 0, 0]));
     const amount = collision.normal.dot(this.ball.velocity);
     const impact = collision.normal.multiply(amount * 0.5);
     this.ball.velocity.x = mathMaxWithSign(this.ball.velocity.x - impact.x, 0);
@@ -102,19 +114,125 @@ class PhysicsWorld {
     this.ball.velocity.z = mathMaxWithSign(this.ball.velocity.z - impact.z, 0);
   }
 
+  /**
+   * Applies gravity to the ball
+   * @param {Number} dt deltaTime
+   */
   applyGravity(dt) {
     this.ball.velocity = this.ball.velocity.add(this.gravityDirection.multiply(this.gravityStrength * dt * this.timescale));
+  }
+
+  /**
+   * Adds a physics debug draw 
+   * @param {PhysicsDraw} op The draw to add
+   */
+  addDebugDraw(op) {
+    this._drawOps.push(op);
   }
 
   /**
    * Debug draw function
    * @param {Scene} scene The scene
    */
-   debugDraw(scene) {
-    this.colliders.forEach((collider) => {
-      collider.debugDraw(scene);
-    });
-    this.ball.debugDraw(scene);
+  draw(scene) {
+    if (this.drawColliders) {
+      this.colliders.forEach((collider) => {
+        collider.debugDraw(scene);
+      });
+    }
+    if (this.drawTrail) {
+      this.ball.debugDraw(scene);
+      this._drawOps.forEach((op) => {
+        op.draw(scene);
+      });
+      this._drawOps = this._drawOps.filter((op) => {
+        if (op.life <= 0) {
+          op.remove();
+          return false;
+        }
+        return true;
+      });
+    }
+  }
+}
+
+/**
+ * @class
+ * @classdesc Debug draw base class for physics
+ */
+class PhysicsDraw {
+  /**
+   * Base draw class for debug physics draws
+   * @param {String} type The name of the draw
+   * @param {Number} lifetime The duration of the draw, in seconds
+   */
+  constructor(type, lifetime) {
+    this.type = type || "base";
+    this.startTime = Date.now();
+    this.lifeTime = lifetime || 5;
+    this.colour = [1, 1, 1, 1];
+  }
+
+  get type() { return this._type; }
+  get startTime() { return this._startTime; }
+  get lifeTime() { return this._lifeTime; }
+  get life() { return Math.max(1 - (Date.now() - this.startTime) / (this.lifeTime*1000), 0) }
+  get colour() { return this._colour; }
+
+  set type(name) { this._type = name; }
+  set startTime(time) { this._startTime = time; }
+  set lifeTime(time) { this._lifeTime = time; }
+  set colour(colour) { this._colour = colour; }
+
+  /**
+   * Overwritable draw function
+   * @param {Scene} scene The scene object to draw to
+   */
+  draw(scene) {
+    return;
+  }
+
+  /**
+   * Overwritable remove function
+   */
+  remove() {
+    return;
+  }
+}
+
+/**
+ * @class
+ * @classdesc Debug line drawing class
+ */
+class PhysicsDrawLine extends PhysicsDraw {
+  /**
+   * Creates a debug line to render
+   * @param {Vector} startPos The start of the line
+   * @param {Vector} endPos The end of the line
+   * @param {Number} lifetime The life of the line, in seconds
+   * @param {Colour} colour The colour of the line
+   */
+  constructor(startPos, endPos, colour, lifetime) {
+    super("line");
+    this.startPos = startPos;
+    this.endPos = endPos;
+    if (lifetime) {
+      this.lifeTime = lifetime;
+    }
+    if (colour) {
+      this.colour = colour;
+    }
+  }
+
+  /**
+   * Draws this line to the screen
+   * @param {Scene} scene The scene to draw to
+   */
+  draw(scene) {
+    const colour = this.colour;
+    const a = (colour[3] || 1) * this.life;
+    _r.color(colour[0], colour[1], colour[2], a);
+    scene.drawLine(this.startPos, this.endPos);
   }
 }
 
@@ -353,7 +471,7 @@ class PlaneCollider extends PhysicsCollider {
     collider.debugDraw = (scene) => {
       // oldDebugDraw(scene);
       // Draw default points
-      _r.color(1, 1, 1, 1);
+      _r.color(1, 1, 1, 0.2);
       for (let i=0; i < points.length; i++) {
         const current = points[i];
         const next = points[(i+1) % points.length];
@@ -452,7 +570,7 @@ class CylinderCollider extends PhysicsCollider {
    * @param {Scene} scene The scene, for rendering
    */
   debugDraw(scene) {
-    _r.color(1, 1, 0, 1);
+    _r.color(1, 1, 1, 0.2);
     scene.drawLine(this.startPos, this.endPos);
   }
 }
