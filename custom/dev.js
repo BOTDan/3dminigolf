@@ -340,7 +340,6 @@ GameBase.Console.AddCommand("debugpoint", (x, y, z) => {
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   drawBallPos();
   BALL_ENTITY.update();
-  drawBallPower();
 
   _r.layer = 0;
   if (BALL_ENTITY.cameraAttached) {
@@ -349,10 +348,11 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
   }
   // print(SCENE.camera.rotation);
   SCENE.draw();
-  if (physDebugDraw) {
-    PHYSICS.debugDraw(SCENE);
-  }
+  PHYSICS.draw(SCENE);
 
+  updateBallPower();
+
+  
   _r.color(0, 1, 0, 1);
   debugPoints.forEach((point) => {
     SCENE.drawPoint(point, 5);
@@ -446,7 +446,7 @@ function drawBallPos() {
   GameBase.Debug.AddOverlay(`Ball Z: ${BALL_ENTITY.position.z}`, [0, 1, 0, 1]);
 }
 
-function drawBallPower() {
+function updateBallPower() {
   const [cursorX, cursorY] = GameBase.GetCursorPos();
   const normal = SCENE.screenPosToLookDir(cursorX, cursorY);
   if (normal) {
@@ -530,7 +530,10 @@ GameBase.Hooks.Add("OnMousePressed", "h", (x, y, button) => {
         new Vector(0, 1, 0)
       );
       if (hitPos && hitPos.distance > 0) {
-        BALL_ENTITY.velocity = BALL_ENTITY.velocity.add(hitPos.point.subtract(BALL_ENTITY.position));
+        BALL_ENTITY.aimTarget = hitPos.point;
+        BALL_ENTITY.velocity = BALL_ENTITY.velocity.add(BALL_ENTITY.aimTargetVelocity)
+      } else {
+        BALL_ENTITY.aimTarget = null;
       }
     }
   }

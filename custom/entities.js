@@ -27,6 +27,8 @@ class BallEntity {
     this.setupArrowModel();
 
     this.aimTarget = null;
+    this.aimTargetMaxDistance = 1.8;
+    this.aimTargetMaxVelocity = 8;
   }
 
   get scene() { return this._scene; }
@@ -43,8 +45,15 @@ class BallEntity {
     return this.position.subtract(awayVector);
   }
   get aimTarget() { return this._aimTarget; }
+  get aimTargetMaxDistance() { return this._aimTargetMaxDistance; }
+  get aimTargetMaxVelocity() { return this._aimTargetMaxVelocity; }
+  get aimTargetVelocity() {
+    const dir = this.aimTarget.subtract(this.position);
+    const dist = Math.min(dir.length(), this.aimTargetMaxDistance);
+    const vel = this.aimTargetMaxVelocity * (dist / this.aimTargetMaxDistance);
+    return dir.normalize().multiply(vel);
+  }
   get arrowHead() { return this._arrowHead; }
-  get arrowBody() { return this._arrowBody; }
 
   set position(vector) {
     this.physics.position = vector;
@@ -67,12 +76,22 @@ class BallEntity {
     this._cameraDistance = number;
   }
   set aimTarget(vector) {
+    if (vector) {
+      vector.y = this.position.y;
+    }
     this._aimTarget = vector;
-    this.updateArrowModel();
+    // this.updateArrowModel();
+  }
+  set aimTargetMaxDistance(distance) {
+    this._aimTargetMaxDistance = distance;
+  }
+  set aimTargetMaxVelocity(number) {
+    this._aimTargetMaxVelocity = number;
   }
 
   update() {
     this.model.position = this.physics.position;
+    this.updateArrowModel();
   }
 
   /**
@@ -80,26 +99,22 @@ class BallEntity {
    */
   setupArrowModel() {
     this._arrowHead = new Model(this.position);
-    this._arrowBody = new Model(this.position);
 
     this.arrowHead.addVert(
       new Vector(-0.5, 0, 0),
       new Vector(0, 0, 0.5),
-      new Vector(0.5, 0, 0)
+      new Vector(0.5, 0, 0),
+      new Vector(0.25, 0, 0),
+      new Vector(0.25, 0, 0),
+      new Vector(-0.25, 0, 0),
+      new Vector(-0.25, 0, 0)
     );
-    this.arrowHead.addFace(new Face([0, 1, 2]));
+    this.arrowHead.addFace(
+      new Face([0, 1, 2]),
+      new Face([3, 4, 5, 6])
+    );
     this.arrowHead.zIndex = 100;
     this.scene.addModel(this.arrowHead);
-
-    this.arrowBody.addVert(
-      new Vector(-0.5, 0, 0),
-      new Vector(-0.5, 0, 1),
-      new Vector(0.5, 0, 1),
-      new Vector(0.5, 0, 0)
-    );
-    this.arrowBody.addFace(new Face([0, 1, 2, 3]));
-    this.arrowBody.zIndex = 100;
-    this.scene.addModel(this.arrowBody);
   }
 
   /**
@@ -108,17 +123,22 @@ class BallEntity {
   updateArrowModel() {
     const hasTarget = (this.aimTarget !== null);
     this.arrowHead.visible = hasTarget;
-    this.arrowBody.visible = hasTarget;
     if (!hasTarget) {
       return;
     }
     const dir = this.aimTarget.subtract(this.position);
-    const dist = dir.length();
-    this.arrowBody.position = this.position;
-    this.arrowBody.rotation = dir.asAngle();
-    this.arrowBody.scale = new Vector(this.radius*2, 1, dist);
-    this.arrowHead.position = this.position.add(dir);
+    const dist = Math.min(dir.length(), this.aimTargetMaxDistance);
+    this.arrowHead.position = this.position;
     this.arrowHead.rotation = dir.asAngle();
     this.arrowHead.scale = new Vector(this.radius*4, 1, this.radius*4);
+    const vertDist = dist / this.arrowHead.scale.z
+    this.arrowHead.verts[0].z = vertDist;
+    this.arrowHead.verts[1].z = vertDist + 0.5;
+    this.arrowHead.verts[2].z = vertDist;
+    this.arrowHead.verts[3].z = vertDist;
+    this.arrowHead.verts[6].z = vertDist;
+    const percent = dist / this.aimTargetMaxDistance;
+    const colour = () => { return [1, 1 - 0.9*percent, 0]; }
+    this.arrowHead.calcColour = colour;
   }
 }
