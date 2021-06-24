@@ -51,6 +51,7 @@
 		"cursor_clicker": "gamebase/textures/cursor_clicker.png",
 		"cursor_text": "gamebase/textures/cursor_text.png",
 		"placeholder": "custom/textures/placeholder.png",
+		"skysphere": "custom/textures/skysphere.jpg -wrap-x -wrap-y",
 		"snake_texture": "custom/textures/snake_texture.png"
 	},
 	"sounds": {

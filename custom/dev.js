@@ -331,7 +331,16 @@ GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
     SCENE.camera.position = BALL_ENTITY.cameraPosition;
     SCENE.camera.rotation = BALL_ENTITY.cameraAngle;
   }
-  // print(SCENE.camera.rotation);
+
+  // Testing skybox
+  const fov = (SCENE.camera.fov / 2) / 360;
+  const fovY = (SCENE.camera.fovY / 2) / 360;
+  const u = -SCENE.camera.rotation.yaw / 360;
+  const v = SCENE.camera.rotation.pitch / 360;
+  _r.rect(0, 0, _m.width, _m.height, assets["skysphere.tex"], u-fov, 0.5+(v-fovY), u+fov, 0.5+(v+fovY));
+
+  _r.layer++;
+
   SCENE.draw();
   PHYSICS.draw(SCENE);
 
