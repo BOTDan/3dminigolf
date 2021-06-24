@@ -234,9 +234,10 @@ SCENE.addModel(start, straight1, hill, end);
 // physicsFromModel(hill, PHYSICS);
 // physicsFromModel(end, PHYSICS);
 
-const snayyyyke = ModelCache.newModel("DEBUG_Snake");
+const snayyyyke = ModelCache.newModel("DEBUG_Snake_UVs");
 snayyyyke.position = new Vector(5, -1.2, 7);
-snayyyyke.calcColour = flatLighting;
+snayyyyke.calcColour = Model.flatLighting;
+snayyyyke.texture = assets["snake_texture.tex"];
 SCENE.addModel(snayyyyke);
 
 const snayyyykePhys = ModelCache.newModel("DEBUG_Snake_Phys");
