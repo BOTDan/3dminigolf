@@ -54,14 +54,17 @@ function parsePLY(fileContent) {
       switch (element.name) {
         case "vertex": {
           const pos = new Vector();
+          const uv = new Vector();
           element.format.forEach((property, index) => {
             switch (property.name) {
               case "x": pos.x = parseFloat(parts[index]); break;
               case "y": pos.y = parseFloat(parts[index]); break;
               case "z": pos.z = parseFloat(parts[index]); break;
+              case "s": uv.x = parseFloat(parts[index]); break;
+              case "t": uv.y = parseFloat(parts[index]); break;
             }
           });
-          parsedData[element.name].push(pos);
+          parsedData["vertex"].push({pos, uv});
           break;
         }
         case "face": {
@@ -70,7 +73,7 @@ function parsePLY(fileContent) {
           for (let j=0; j < amount; j++) {
             verts.push(parseInt(parts[1+j]));
           }
-          parsedData[element.name].push(verts);
+          parsedData["face"].push(verts);
           break;
         }
       }
@@ -82,7 +85,8 @@ function parsePLY(fileContent) {
 
 function generateModel(parsedData) {
   const model = new Model();
-  model.verts = parsedData.vertex;
+  model.verts = parsedData.vertex.map((vertex) => vertex.pos);
+  model.uvs = parsedData.vertex.map((vertex) => vertex.uv);
   parsedData.face.forEach(verts => {
     const face = new Face(verts);
     face.flipNormal = false;

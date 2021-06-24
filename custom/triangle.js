@@ -14,9 +14,11 @@ class Triangle {
    */
   constructor(vert1, vert2, vert3, colour, flipNormal, zIndex) {
     this.verts = [vert1, vert2, vert3];
-    this.colour = colour || [1, 0, 0, 1];
+    this.colour = colour || [1, 1, 1, 1];
     this.flipNormal = flipNormal || false;
     this.zIndex = zIndex || 0;
+    this.uvs = [];
+    this.texture = null;
 
     this.worldVerts = [];
 
@@ -42,12 +44,16 @@ class Triangle {
   get culled() { return this._culled; }
   get worldVerts() { return this._worldVerts; }
   get zIndex() { return this._zIndex; }
+  get uvs() { return this._uvs; }
+  get texture() { return this._texture; }
 
   set verts(value) { this._verts = value; }
   set colour(value) { this._colour = value; }
   set flipNormal(value) { this._flipNormal = value; }
   set worldVerts(value) { this._worldVerts = value; }
   set zIndex(value) { this._zIndex = value; }
+  set uvs(value) { this._uvs = value; }
+  set texture(value) { this._texture = value; }
 
   /**
    * Internally updates the zmin, zmax and zavg. Usually called after clipping
@@ -161,12 +167,16 @@ class Triangle {
       const point1 = this.screenVerts[0];
       const point2 = this.screenVerts[i];
       const point3 = this.screenVerts[i+1];
+      const uv1 = this.uvs[0] || new Vector();
+      const uv2 = this.uvs[1] || new Vector();
+      const uv3 = this.uvs[2] || new Vector();
       _r.color(...colour);
       _r.quad(
-        point1.x, point1.y, 0, 0,
-        point2.x, point2.y, 1, 0,
-        point3.x, point3.y, 1, 1,
-        point3.x, point3.y, 0, 1
+        point1.x, point1.y, uv1.x, uv1.y,
+        point2.x, point2.y, uv2.x, uv2.y,
+        point3.x, point3.y, uv3.x, uv3.y,
+        point3.x, point3.y, uv3.x, uv3.y,
+        this.texture
       );
     }
   }

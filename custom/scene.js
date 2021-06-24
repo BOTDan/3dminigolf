@@ -116,6 +116,7 @@ class Scene {
       _r.pushcliprect(this.posX, this.posY, this.width, this.height);
     }
     triangles.forEach((triangle) => {
+      _r.layer++;
       if (this.drawFaces) {
         triangle.draw();
       }
