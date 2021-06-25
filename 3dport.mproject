@@ -56,7 +56,7 @@
 		"skysphere": "custom/textures/skysphere.jpg -wrap-x -wrap-y",
 		"snake_texture": "custom/textures/snake_texture.png",
 		"skytexture_blue": "custom/textures/skysphere_blue.png -wrap-x -wrap-y",
-		"skytexture_clouds": "custom/textures/skytexture_clouds.png -wrap-x -wrap-y"
+		"skytexture_clouds": "custom/textures/skytexture_clouds.png -wrap-x -wrap-y -smooth"
 	},
 	"sounds": {
 
