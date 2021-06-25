@@ -35,11 +35,13 @@
 		"1_model": "custom/model.js",
 		"1_draw": "custom/draw.js",
 		"1_scene": "custom/scene.js",
+		"1_world": "custom/world.js",
 		"2_plyparser": "custom/plyparser.js",
 		"2_physics": "custom/physics.js",
 		"3_models": "custom/models/mingolf_models.js",
-		"4_entities": "custom/entities.js",
-		"main": "custom/dev.js"
+		"4_entities_ball": "custom/entities/ball.js",
+		"4_worlds_world1": "custom/worlds/world1.js",
+		"main": "custom/game.js"
 	},
 	"textures": {
 		"font_mplus1m_light": "gamebase/fonts/font_mplus1m_light.png",
@@ -52,7 +54,9 @@
 		"cursor_text": "gamebase/textures/cursor_text.png",
 		"placeholder": "custom/textures/placeholder.png",
 		"skysphere": "custom/textures/skysphere.jpg -wrap-x -wrap-y",
-		"snake_texture": "custom/textures/snake_texture.png"
+		"snake_texture": "custom/textures/snake_texture.png",
+		"skytexture_blue": "custom/textures/skysphere_blue.png -wrap-x -wrap-y",
+		"skytexture_clouds": "custom/textures/skytexture_clouds.png -wrap-x -wrap-y"
 	},
 	"sounds": {
 

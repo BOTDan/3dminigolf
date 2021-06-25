@@ -89,7 +89,7 @@ class BallEntity {
     this._aimTargetMaxVelocity = number;
   }
 
-  update() {
+  think(dt) {
     this.model.position = this.physics.position;
     this.updateArrowModel();
   }
