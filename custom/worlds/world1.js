@@ -8,7 +8,7 @@ class World1 extends World {
 
     const snake = ModelCache.newModel("DEBUG_Snake_UVs");
     snake.calcColour = Model.flatLighting;
-    snake.texture = assets["snake_texture.tex"];
+    snake.texture = assets["snake_texture_2.tex"];
     this.addModel(snake);
 
     const snakePhys = ModelCache.newModel("DEBUG_Snake_Phys");
