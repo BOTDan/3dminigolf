@@ -50,6 +50,23 @@ GameBase.Hooks.Add("Think", "MINIGOLF_Think", (time, dt) => {
     world.camera.position = world.ball.cameraPosition;
     world.camera.rotation = world.ball.cameraAngle;
   }
+
+  const [cursorX, cursorY] = GameBase.GetCursorPos();
+  world.camera.updateMatrix();
+  const normal = world.scene.screenPosToLookDir(cursorX, cursorY);
+  if (normal) {
+    const hitPos = util.getLineIntersection(
+      world.camera.position,
+      world.camera.position.add(normal),
+      world.ball.position,
+      new Vector(0, 1, 0)
+    );
+    if (hitPos && hitPos.distance > 0) {
+      world.ball.aimTarget = hitPos.point;
+    } else {
+      world.ball.aimTarget = null;
+    }
+  }
 });
 
 let mouseDragging = false;
@@ -67,7 +84,22 @@ GameBase.Hooks.Add("OnMousePressed", "MINIGOLF_OnMousePressed", (x, y, button) =
   }
   // LMB - Handle hitting the ball if allowed
   if (button === 0) {
-
+    const [cursorX, cursorY] = GameBase.GetCursorPos();
+    const normal = world.scene.screenPosToLookDir(cursorX, cursorY);
+    if (normal) {
+      const hitPos = util.getLineIntersection(
+        world.camera.position,
+        world.camera.position.add(normal),
+        world.ball.position,
+        new Vector(0, 1, 0)
+      );
+      if (hitPos && hitPos.distance > 0) {
+        world.ball.aimTarget = hitPos.point;
+        world.ball.velocity = world.ball.velocity.add(world.ball.aimTargetVelocity)
+      } else {
+        world.ball.aimTarget = null;
+      }
+    }
   }
 });
 
