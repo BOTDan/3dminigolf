@@ -8,9 +8,11 @@ WorldManager.loadWorld("world1");
  * Main Drawing for the game
  */
 GameBase.Hooks.Add("Draw", "MINIGOLF_Draw", () => {
-  if (WorldManager.activeWorld) {
-    WorldManager.activeWorld.draw();
-  }
+  if (!WorldManager.activeWorld) { return; }
+
+  const world = WorldManager.activeWorld;
+
+  world.draw();
 });
 
 /**
@@ -55,6 +57,10 @@ let mouseDragging = false;
  * Main callback for mouse clicks
  */
 GameBase.Hooks.Add("OnMousePressed", "MINIGOLF_OnMousePressed", (x, y, button) => {
+  if (!WorldManager.activeWorld) { return; }
+
+  const world = WorldManager.activeWorld;
+
   // RMB - Handle camera dragging
   if (button === 1) {
     mouseDragging = true;
