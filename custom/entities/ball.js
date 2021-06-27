@@ -141,4 +141,35 @@ class BallEntity {
     const colour = () => { return [1, 1 - 0.9*percent, 0]; }
     this.arrowHead.calcColour = colour;
   }
+
+  /**
+   * Updates the aim target to match the player's aim
+   * @param {Vector || null} aimNormal The normal the player is aiming along
+   */
+  updateAimTarget(aimNormal) {
+    if (!aimNormal) {
+      this.aimTarget = null;
+      return;
+    }
+    const hitPos = util.getLineIntersection(
+      this.scene.camera.position,
+      this.scene.camera.position.add(aimNormal),
+      this.position,
+      new Vector(0, 1, 0)
+    );
+    if (hitPos && hitPos.distance > 0) {
+      this.aimTarget = hitPos.point;
+    } else {
+      this.aimTarget = null;
+    }
+  }
+
+  /**
+   * Hits the ball along the aim target
+   */
+  hit() {
+    if (this.aimTarget) {
+      this.velocity = this.velocity.add(this.aimTargetVelocity);
+    }
+  }
 }
