@@ -215,7 +215,7 @@ class Scene {
     const amountX = -1 + ((x - this.posX) / this.width) * 2;
     const amountY = -1 + (-(y - this.posY) / this.height + 1) * 2;
     const pos = new Vector(amountX, amountY, 0);
-    const matrix = this.camera.matrix.invert();
+    const matrix = this.camera.inverseMatrix;
     const converted = pos.multiplyMatrix(matrix);
     const normal = converted.subtract(this.camera.position).normalize();
     return normal;

@@ -34,6 +34,12 @@ class Camera {
     }
     return this._matrix;
   }
+  get inverseMatrix() {
+    if (!this._inverseMatrix) {
+      this._inverseMatrix = this.matrix.invert();
+    }
+    return this._inverseMatrix;
+  }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
@@ -120,5 +126,6 @@ class Camera {
    */
   updateMatrix() {
     this._matrix = this.getFinalMatrix();
+    this._inverseMatrix = null;
   }
 }
