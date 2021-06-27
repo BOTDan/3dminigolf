@@ -23,6 +23,7 @@ GameBase.Hooks.Add("Think", "MINIGOLF_Think", (time, dt) => {
 
   const world = WorldManager.activeWorld;
 
+  // Free cam
   let forward = 0;
   let right = 0;
   let up = 0;
@@ -44,15 +45,21 @@ GameBase.Hooks.Add("Think", "MINIGOLF_Think", (time, dt) => {
   world.camera.position = world.camera.position.add(rightDir.multiply(right * speed));
   world.camera.position = world.camera.position.add(upDir.multiply(up * speed));
   
+  // Think before camera attachment, as ball needs to move before we move to it
   world.think(dt);
   
+  // Move camera to ball if attached 
   if (world.ball.cameraAttached) {
     world.camera.position = world.ball.cameraPosition;
     world.camera.rotation = world.ball.cameraAngle;
   }
 
-  const [cursorX, cursorY] = GameBase.GetCursorPos();
+  // We've changed the camera position, but this won't be updated til draw,
+  // so manually update it here
   world.camera.updateMatrix();
+
+  // Update aim
+  const [cursorX, cursorY] = GameBase.GetCursorPos();
   const normal = world.scene.screenPosToLookDir(cursorX, cursorY);
   world.ball.updateAimTarget(normal);
 });
