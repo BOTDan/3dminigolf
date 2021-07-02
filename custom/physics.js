@@ -13,7 +13,7 @@ class PhysicsWorld {
     this.timescale = 1;
     this.paused = false;
     this.drawColliders = false;
-    this.drawTrail = false;
+    this.drawTrail = true;
     this._drawOps = [];
   }
 
@@ -107,11 +107,24 @@ class PhysicsWorld {
     this.ball.velocity = this.ball.velocity.reflect(collision.normal);
     this.addDebugDraw(new PhysicsDrawLine(oldPosition, this.ball.position));
     this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(collision.normal.multiply(0.1)), [1, 0, 0]));
+    // Restitution
     const amount = collision.normal.dot(this.ball.velocity);
     const impact = collision.normal.multiply(amount * 0.5);
-    this.ball.velocity.x = mathMaxWithSign(this.ball.velocity.x - impact.x, 0);
-    this.ball.velocity.y = mathMaxWithSign(this.ball.velocity.y - impact.y, 0);
-    this.ball.velocity.z = mathMaxWithSign(this.ball.velocity.z - impact.z, 0);
+    this.ball.velocity.x = this.ball.velocity.x - impact.x;
+    this.ball.velocity.y = this.ball.velocity.y - impact.y;
+    this.ball.velocity.z = this.ball.velocity.z - impact.z;
+    // Friction
+    const right = collision.normal.cross(this.ball.velocity);
+    const forward = right.cross(collision.normal); // This is the full force along this vector, not normalised
+    // const paralellness = this.ball.velocity.normalize().dot(forward.normalize());
+    // New: Closer to 1.0 = closer to paralell to plane
+    let friction = forward.invert().normalize();
+    const factor = Math.max(Math.min(forward.length() * 0.01, 0.01), 0.005)
+    friction = friction.multiply(factor);
+    this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(friction.multiply(5)), [0, 1, 0]));
+    this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -friction.x);
+    this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -friction.y);
+    this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -friction.z);
   }
 
   /**
@@ -622,6 +635,19 @@ function mathMaxWithSign(number, max) {
     return Math.min(number, -max);
   }
   return Math.max(number, max);
+}
+
+/**
+ * Subtracts a number from another, preventing the sign from switching
+ * @param {Number} number The starting number
+ * @param {Number} amount The number to subtract
+ * @returns {Number} The subtracted number, clamped to 0
+ */
+function clampedSubtract(number, amount) {
+  const sign = Math.sign(number);
+  number = number * sign;
+  const result = Math.max(number - (amount * sign), 0);
+  return result * sign;
 }
 
 /**
