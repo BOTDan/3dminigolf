@@ -2,7 +2,7 @@
 GameBase.Debug.ShowFPS = true;
 
 // Load first world
-WorldManager.loadWorld("world1");
+WorldManager.loadWorld("world2");
 
 /**
  * Main Drawing for the game
