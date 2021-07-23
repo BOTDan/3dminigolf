@@ -41,6 +41,7 @@
 		"3_models": "custom/models/mingolf_models.js",
 		"4_entities_ball": "custom/entities/ball.js",
 		"4_worlds_world1": "custom/worlds/world1.js",
+		"4_worlds_world2": "custom/worlds/world2.js",
 		"main": "custom/game.js"
 	},
 	"textures": {
