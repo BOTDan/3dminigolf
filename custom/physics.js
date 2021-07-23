@@ -298,20 +298,20 @@ class PhysicsBall {
   /**
    * Creates a new ball
    * @param {Vector} pos The position of the ball 
-   * @param {Number} size The size of the ball 
+   * @param {Number} radius The radius of the ball 
    */
-  constructor(pos, size=0.1) {
+  constructor(pos, radius=0.1) {
     this.position = pos;
     this.rotation = new Angle(0, 0, 0);
     this.velocity = new Vector(0, 0, 0);
-    this.size = size;
+    this.radius = radius;
   }
 
   get position() { return this._position; }
   get pos() { return this.position; }
   get rotation() { return this._rotation; }
   get velocity() { return this._velocity; }
-  get size() { return this._size; }
+  get radius() { return this._radius; }
   get aabb() {
     if (!this._aabb) {
       this._aabb = this.calcAABB();
@@ -323,7 +323,7 @@ class PhysicsBall {
   set pos(value) { this.position = value; }
   set rotation(value) { this._rotation = value; }
   set velocity(value) { this._velocity = value; }
-  set size(value) { this._size = value; }
+  set radius(value) { this._radius = value; }
 
   /**
    * Returns the AABB for where the ball will move in 1 second

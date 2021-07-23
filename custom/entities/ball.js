@@ -35,7 +35,7 @@ class BallEntity {
   get physics() { return this._physics; }
   get position() { return this.physics.position; }
   get velocity() { return this.physics.velocity; }
-  get radius() { return this.physics.size; }
+  get radius() { return this.physics.radius; }
   get model() { return this._model; }
   get cameraAttached() { return this._cameraAttached; }
   get cameraAngle() { return this._cameraAngle; }
@@ -63,7 +63,7 @@ class BallEntity {
     this.physics.velocity = vector;
   }
   set radius(number) {
-    this.physics.size = number;
+    this.physics.radius = number;
     this.model.scale = new Vector(number, number, number);
   }
   set cameraAttached(boolean) {
