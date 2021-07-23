@@ -264,4 +264,20 @@ class Vector {
         const out = new Angle(-pitch, yaw, 0);
         return out;
     }
+
+    /**
+     * Rotates this vector around an axis
+     * @param {Vector} axis The normalized axis vector
+     * @param {Number} angle The angle to rotate by, in degrees
+     * @returns {Vector} The rotated vector
+     */
+    rotateAroundAxis(axis, angle) {
+        const ang = util.toRadians(angle);
+        const left = this.multiply(Math.cos(ang))
+        const cross = axis.cross(this);
+        const middle = cross.multiply(Math.sin(ang));
+        const right = axis.multiply(axis.multiply(this)).multiply(1 - Math.cos(ang));
+        const final = left.add(middle).add(right);
+        return final;
+    }
 }

@@ -121,10 +121,26 @@ class PhysicsWorld {
     let friction = forward.invert().normalize();
     const factor = Math.max(Math.min(forward.length() * 0.01, 0.01), 0.005)
     friction = friction.multiply(factor);
-    this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(friction.multiply(5)), [0, 1, 0]));
+    // this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(friction.multiply(5)), [0, 1, 0]));
     this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -friction.x);
     this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -friction.y);
     this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -friction.z);
+  }
+
+  /**
+   * Updates the balls rotation given the move vector
+   * @param {Vector} forward The forward vector the ball moved
+   * @param {Number} dist The distance the ball moved
+   */
+  updateRotation(forward, dist) {
+    dist = dist || forward.length();
+    const right = this.gravityDirection.cross(forward).normalize();
+    const angle = dist / (2 * Math.PI * this.ball.size) * 360;
+    const forwardAngle = forward.asAngle();
+    const newAngle = this.ball.rotation.getForward().normalize().rotateAroundAxis(right, -angle);
+    this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(newAngle.multiply(0.1)), [0, 1, 1]));
+    // this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(right), [0, 0, 1]));
+    this.ball.rotation = newAngle.asAngle();
   }
 
   /**
@@ -284,17 +300,20 @@ class PhysicsBall {
    */
   constructor(pos, size=0.1) {
     this.position = pos;
+    this.rotation = new Angle(0, 0, 0);
     this.velocity = new Vector(0, 0, 0);
     this.size = size;
   }
 
   get position() { return this._position; }
   get pos() { return this.position; }
+  get rotation() { return this._rotation; }
   get velocity() { return this._velocity; }
   get size() { return this._size; }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
+  set rotation(value) { this._rotation = value; }
   set velocity(value) { this._velocity = value; }
   set size(value) { this._size = value; }
 

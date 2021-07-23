@@ -91,6 +91,7 @@ class BallEntity {
 
   think(dt) {
     this.model.position = this.physics.position;
+    this.model.rotation = this.physics.rotation;
     this.updateArrowModel();
   }
 

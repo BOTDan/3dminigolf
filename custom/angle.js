@@ -183,4 +183,38 @@ class Angle {
     toString() {
         return `{pitch: ${this.p}, yaw: ${this.y}, roll: ${this.r}}`;
     }
+
+    /**
+     * Rotates this angle (EXPENSIVE AND RUBBISH)
+     * @param {Vector} axis The axis to rotate around
+     * @param {Number} angle The amount to rotate by, in degrees
+     * @returns {Angle} The rotated angle
+     */
+    rotateAroundAxis(axis, angle) {
+        const front = this.getForward();
+        const right = this.getRight();
+        const up = this.getUp();
+        const newFront = front.rotateAroundAxis(axis, angle);
+        const newRight = right.rotateAroundAxis(axis, angle);
+        const newUp = up.rotateAroundAxis(axis, angle);
+
+        const newMatrix = Matrix.transformationMatrix();
+        // Front
+        newMatrix[0][2] = newFront.x;
+        newMatrix[1][2] = newFront.y;
+        newMatrix[2][2] = newFront.z;
+        // Right
+        newMatrix[0][0] = newRight.x;
+        newMatrix[1][0] = newRight.y;
+        newMatrix[2][0] = newRight.z;
+        // Up
+        newMatrix[0][1] = newUp.x;
+        newMatrix[1][1] = newUp.y;
+        newMatrix[2][1] = newUp.z;
+        // Convert to angle
+        const yaw = util.toDegrees(Math.atan2(newMatrix[2][0], newMatrix[2][1]));
+        const pitch = util.toDegrees(Math.acos(newMatrix[2][2]));
+        const roll = util.toDegrees(-Math.atan2(newMatrix[0][2], newMatrix[1][2]));
+        return new Angle(pitch, yaw, this.roll);
+    }
 }
