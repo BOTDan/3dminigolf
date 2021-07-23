@@ -58,10 +58,12 @@ class PhysicsWorld {
     if (this.paused) { return; }
     this.applyGravity(dt);
     let remainingDistance = this.ball.velocity.length() * dt * this.timescale;
+    this.ball.updateAABB();
     let nextCollision = this.findNextCollision(remainingDistance);
     while (nextCollision) {
       this.processCollision(nextCollision);
       remainingDistance -= Math.sqrt(nextCollision.distanceSqr);
+      this.ball.updateAABB();
       nextCollision = this.findNextCollision(remainingDistance, nextCollision.collider);
     }
     // No more collisions, move to the end of the line
@@ -310,12 +312,38 @@ class PhysicsBall {
   get rotation() { return this._rotation; }
   get velocity() { return this._velocity; }
   get size() { return this._size; }
+  get aabb() {
+    if (!this._aabb) {
+      this._aabb = this.calcAABB();
+    }
+    return this._aabb;
+  }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
   set rotation(value) { this._rotation = value; }
   set velocity(value) { this._velocity = value; }
   set size(value) { this._size = value; }
+
+  /**
+   * Returns the AABB for where the ball will move in 1 second
+   * @param {Number} dt deltaTime
+   * @returns {min: Vector, max: Vector} The min and max of the AABB for the balls movement
+   */
+  calcAABB(dt=1) {
+    return {
+      min: this.position.min(this.position.add(this.velocity.multiply(dt))),
+      max: this.position.max(this.position.add(this.velocity.multiply(dt))),
+    };
+  }
+
+  /**
+   * Updates the AABB for the balls movement
+   * @param {Number} dt deltaTime
+   */
+  updateAABB(dt=1) {
+    this._aabb = this.calcAABB(dt);
+  }
 
   /**
    * Debug draw function
@@ -337,6 +365,12 @@ let physDebugCounter = 0;
 class PhysicsCollider {
   get ball() { return this._ball; }
   get ballSize() { return this._ballSize; }
+  get aabb() {
+    if (!this._aabb) {
+      this._aabb = this.calcAABB();
+    }
+    return this._aabb;
+  }
 
   set ball(value) {
     this._ball = value;
@@ -364,6 +398,17 @@ class PhysicsCollider {
    */
   calcCollision() {
     return null;
+  }
+
+  /**
+   * Returns an axis-aligned bounding box for this collider
+   * @returns {min: Vector, max: Vector} The min and max point of the AABB
+   */
+  calcAABB() {
+    return {
+      min: new Vector(-Infinity, -Infinity, -Infinity),
+      max: new Vector(Infinity, Infinity, Infinity),
+    };
   }
 
   /**
@@ -416,6 +461,9 @@ class PlaneCollider extends PhysicsCollider {
    * @returns {PhysicsCollision} Collision data
    */
   calcCollision() {
+    if (!util.checkOverlapAABB(this.ball.aabb, this.aabb)) {
+      return null;
+    }
     if (this.ball.velocity.dot(this.normal) > 0) {
       return null;
     }
@@ -432,6 +480,17 @@ class PlaneCollider extends PhysicsCollider {
       return null;
     }
     return new PhysicsCollision(this, hitData.point, Math.pow(hitData.distance, 2), this.normal);
+  }
+
+  /**
+   * Returns an axis-aligned bounding box for this collider
+   * @returns {min: Vector, max: Vector} The min and max point of the AABB
+   */
+  calcAABB() {
+    return {
+      min: new Vector(-Infinity, -Infinity, -Infinity),
+      max: new Vector(Infinity, Infinity, Infinity),
+    };
   }
 
   /**
@@ -497,6 +556,20 @@ class PlaneCollider extends PhysicsCollider {
         }
       }
       return true;
+    }
+    // Overwrite calcAABB check to actually give the plane a bounding box
+    collider.calcAABB = () => {
+      let min = points[0];
+      let max = points[0];
+      for (let i=1; i<points.length; i++) {
+        min = min.min(points[i]);
+        max = max.max(points[i]);
+      }
+      const offset = normal.multiply(collider.ball.size);
+      return {
+        min: min.add(offset),
+        max: max.add(offset),
+      };
     }
     // Overwrite the debugDraw to show the outline of the plane
     const oldDebugDraw = collider.debugDraw.bind(collider);
@@ -566,6 +639,9 @@ class CylinderCollider extends PhysicsCollider {
    * @returns {PhysicsCollision} Collision data
    */
   calcCollision() {
+    if (!util.checkOverlapAABB(this.ball.aabb, this.aabb)) {
+      return null;
+    }
     const ballStart = this.ball.position;
     const ballEnd = this.ball.position.add(this.ball.velocity);
     const transformedBallStart = ballStart.multiplyMatrix(this.transformationMatrix);
@@ -595,6 +671,20 @@ class CylinderCollider extends PhysicsCollider {
     const normal = point.subtract(normalStart).normalize();
     const distance = this.ball.position.distanceSqr(point);
     return new PhysicsCollision(this, point, distance, normal);
+  }
+
+  /**
+   * Returns the AABB for this collider
+   * @returns {min: Vector, max: Vector} The mins and max of the AABB
+   */
+  calcAABB() {
+    const min = this.startPos.min(this.endPos);
+    const max = this.startPos.max(this.endPos);
+    const offset = this.radius + this.ball.size;
+    return {
+      min: min.subtract(offset),
+      max: max.add(offset),
+    };
   }
 
   /**

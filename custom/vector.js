@@ -280,4 +280,36 @@ class Vector {
         const final = left.add(middle).add(right);
         return final;
     }
+
+    /**
+     * Returns a new vector containing the minimum x, y and z values of this and another vector
+     * @param {Vector||Number} value The other value to compare to
+     * @returns {Vector} A new vector
+     */
+    min(value) {
+        if (!(value instanceof Vector)) {
+            value = new Vector(value, value, value);  
+        }
+        return new Vector(
+            Math.min(this.x, value.x),
+            Math.min(this.y, value.y),
+            Math.min(this.z, value.z)
+        );
+    }
+
+    /**
+     * Returns a new vector containing the maximum x, y and z values of this and another vector
+     * @param {Vector||Number} value The other value to compare to
+     * @returns {Vector} A new vector
+     */
+    max(value) {
+        if (!(value instanceof Vector)) {
+            value = new Vector(value, value, value);  
+        }
+        return new Vector(
+            Math.max(this.x, value.x),
+            Math.max(this.y, value.y),
+            Math.max(this.z, value.z)
+        );
+    }
 }

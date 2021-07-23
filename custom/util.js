@@ -86,4 +86,18 @@ const util = {
     const nearestPoint = lineStart.add(lineDir.multiply(t));
     return nearestPoint;
   },
+
+  /**
+   * Checks if 2 AABBs overlap
+   * @param {min: Vector, max: Vector} a The min and max of the first AABB
+   * @param {min: Vector, max: Vector} b The min and max of the second AABB
+   * @returns {Boolean} True if overlap
+   */
+  checkOverlapAABB(a, b) {
+    const xOverlap = (a.max.x >= b.min.x && b.max.x >= a.min.x);
+    const yOverlap = (a.max.y >= b.min.y && b.max.y >= a.min.y);
+    const zOverlap = (a.max.z >= b.min.z && b.max.z >= a.min.z);
+    const result = (xOverlap && yOverlap && zOverlap);
+    return result;
+  }
 }
