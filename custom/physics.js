@@ -137,7 +137,7 @@ class PhysicsWorld {
   updateRotation(forward, dist) {
     dist = dist || forward.length();
     const right = this.gravityDirection.cross(forward).normalize();
-    const angle = dist / (2 * Math.PI * this.ball.size) * 360;
+    const angle = dist / (2 * Math.PI * this.ball.radius) * 360;
     const forwardAngle = forward.asAngle();
     const newAngle = this.ball.rotation.getForward().normalize().rotateAroundAxis(right, -angle);
     this.addDebugDraw(new PhysicsDrawLine(this.ball.position, this.ball.position.add(newAngle.multiply(0.1)), [0, 1, 1]));
@@ -351,7 +351,7 @@ class PhysicsBall {
    */
   debugDraw(scene) {
     _r.color(0, 1, 0, 1);
-    scene.drawPoint(this.position, 10);
+    // scene.drawPoint(this.position, 10);
     _r.color(0.5, 1, 0, 1);
     // scene.drawLine(this.position, this.position.add(this.velocity));
   }
@@ -364,7 +364,6 @@ let physDebugCounter = 0;
  */
 class PhysicsCollider {
   get ball() { return this._ball; }
-  get ballSize() { return this._ballSize; }
   get aabb() {
     if (!this._aabb) {
       this._aabb = this.calcAABB();
@@ -453,7 +452,7 @@ class PlaneCollider extends PhysicsCollider {
    * Pre-calculates offset points
    */
   onBallUpdated() {
-    this._offsetPosition = this.position.add(this.normal.multiply(this.ball.size));
+    this._offsetPosition = this.position.add(this.normal.multiply(this.ball.radius));
   }
 
   /**
@@ -515,11 +514,11 @@ class PlaneCollider extends PhysicsCollider {
     // Debug
     const ang = this.normal.asAngle();
     _r.color(1, 0, 0, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getForward().multiply(this.ball.size / 2)));
+    scene.drawLine(this.position, this.position.add(ang.getForward().multiply(this.ball.radius / 2)));
     _r.color(0, 1, 0, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getUp().multiply(this.ball.size / 2)));
+    scene.drawLine(this.position, this.position.add(ang.getUp().multiply(this.ball.radius / 2)));
     _r.color(0, 0, 1, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getRight().multiply(this.ball.size / 2)));
+    scene.drawLine(this.position, this.position.add(ang.getRight().multiply(this.ball.radius / 2)));
   }
 
   /**
@@ -565,7 +564,7 @@ class PlaneCollider extends PhysicsCollider {
         min = min.min(points[i]);
         max = max.max(points[i]);
       }
-      const offset = normal.multiply(collider.ball.size);
+      const offset = normal.multiply(collider.ball.radius);
       return {
         min: min.add(offset),
         max: max.add(offset),
@@ -584,7 +583,7 @@ class PlaneCollider extends PhysicsCollider {
       }
       // Draw offset points
       _r.color(0, 1, 0, 1);
-      const offset = collider.normal.multiply(collider.ball.size);
+      const offset = collider.normal.multiply(collider.ball.radius);
       for (let i=0; i < points.length; i++) {
         const current = points[i];
         const next = points[(i+1) % points.length];
@@ -646,7 +645,7 @@ class CylinderCollider extends PhysicsCollider {
     const ballEnd = this.ball.position.add(this.ball.velocity);
     const transformedBallStart = ballStart.multiplyMatrix(this.transformationMatrix);
     const transformedBallEnd = ballEnd.multiplyMatrix(this.transformationMatrix);
-    const radius = this.radius + this.ball.size;
+    const radius = this.radius + this.ball.radius;
     // Find where line crosses circle
     const results = lineIntersectCircle(transformedBallStart, transformedBallEnd, radius);
     const points = results.map((result) => {
@@ -680,7 +679,7 @@ class CylinderCollider extends PhysicsCollider {
   calcAABB() {
     const min = this.startPos.min(this.endPos);
     const max = this.startPos.max(this.endPos);
-    const offset = this.radius + this.ball.size;
+    const offset = this.radius + this.ball.radius;
     return {
       min: min.subtract(offset),
       max: max.add(offset),
