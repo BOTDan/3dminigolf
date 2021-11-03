@@ -1,4 +1,6 @@
 # 3dminigolf (Arcade API)
+![uVlMZqjQ1N](https://user-images.githubusercontent.com/2904567/140095138-c1e0cc0f-2a45-4835-ab58-bf6ab806577a.gif)
+
 ## What is it?
 This is an attempt to create 3D minigolf in the arcade API. The arcade API runs in JavaScript or lua, but this project uses JavaScript.
 ## What does it contain?
