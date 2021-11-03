@@ -156,3 +156,23 @@ GameBase.Hooks.Add("OnKeyPressed", "MINIGOLF_OnKeyPressed", (keycode) => {
     }
   }
 });
+
+/**
+ * Console command to change level
+ */
+GameBase.Console.AddCommand("changelevel", (world = "") => {
+  world = world.replace(".", "r");
+  const exists = WorldManager.doesWorldExist(world);
+  if (!exists) {
+    GameBase.Console.Log( [ CONSOLE_RED, `World "${world}" does not exist. World not changed.` ] );
+    return;
+  }
+  WorldManager.loadWorld(world);
+  GameBase.Console.Log( [ [46/255, 204/255, 113/255, 1], `World changed to "${world}".` ] );
+}, "(string) [DEBUG] Changes the game world to the given world, if exists.");
+
+for (const name of Object.keys(assets)) {
+  for (const key in assets[name]) {
+    print(`${key} ${assets[name][key]}`)
+  }
+}

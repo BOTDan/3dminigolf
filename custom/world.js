@@ -151,7 +151,19 @@ const WorldManager = {
       this.activeWorld.destroy();
     }
     const newWorld = (typeof world === "string") ? this.registeredWorlds[world] : world;
+    if (!newWorld) {
+      return null;
+    }
     this.activeWorld = new newWorld();
     return this.activeWorld;
+  },
+
+  /**
+   * Returns true if the given world name has been registered
+   * @param {String} name The name of the world
+   * @returns {Boolean} If the world name has been registered
+   */
+  doesWorldExist(name) {
+    return this.registeredWorlds[name] !== undefined;
   }
 }
