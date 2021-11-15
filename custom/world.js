@@ -44,6 +44,16 @@ class World {
   }
 
   /**
+   * Adds the given trigger(s) the the physics simulation
+   * @param  {...PhysicsTrigger} triggers The trigger(s) to add
+   */
+  addPhysicsTrigger(...triggers) {
+    triggers.forEach((trigger) => {
+      this.physics.addTrigger(trigger);
+    });
+  }
+
+  /**
    * Draws the skybox
    * NOTE: Texture should be square, and flipped vertically at midpoint so the bottom half of the
    * image is the regular skybox and the top is an upside-down copy.
