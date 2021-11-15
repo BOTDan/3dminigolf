@@ -29,6 +29,10 @@ class BallEntity {
     this.aimTarget = null;
     this.aimTargetMaxDistance = 1.8;
     this.aimTargetMaxVelocity = 8;
+
+    this._isMoving = false;
+    this._isStationary = true;
+    this._lastStationaryAt = GameBase.GetTime();
   }
 
   get scene() { return this._scene; }
@@ -54,6 +58,7 @@ class BallEntity {
     return dir.normalize().multiply(vel);
   }
   get arrowHead() { return this._arrowHead; }
+  get isMoving() { return this._isMoving; }
 
   set position(vector) {
     this.physics.position = vector;
@@ -88,11 +93,63 @@ class BallEntity {
   set aimTargetMaxVelocity(number) {
     this._aimTargetMaxVelocity = number;
   }
+  set isMoving(boolean) {
+    const oldValue = this.isMoving;
+    this._isMoving = boolean;
+    if (oldValue !== boolean) {
+      if (boolean) {
+        this.onStartMoving();
+      } else {
+        this.onStopMoving();
+      }
+    }
+  }
 
   think(dt) {
     this.model.position = this.physics.position;
     this.model.rotation = this.physics.rotation;
+    this.updateMovingState();
     this.updateArrowModel();
+  }
+
+  /**
+   * Checks if the ball is moving or not and updates the isMoving variable
+   */
+  updateMovingState() {
+    // Check if the ball is _close to_ stationary
+    // Velocity will almost never be 0. This may get fixed in the future.
+    if (this.physics.velocity.length() < 0.1) {
+      if (!this._isStationary) {
+        this._lastStationaryAt = GameBase.GetTime();
+      }
+      this._isStationary = true;
+      // Check if the balls been stationary for x seconds (0.5 here)
+      if (this._lastStationaryAt + 0.5 < GameBase.GetTime()) {
+        this.isMoving = false;
+      } else {
+        this.isMoving = true;
+      }
+    } else {
+      this._isStationary = false;
+      this.isMoving = true;
+    }
+    if (this.isMoving) {
+      print(this.physics.velocity.length())
+    }
+  }
+
+  /**
+   * Called when the ball starts moving
+   */
+  onStartMoving() {
+    print("Started moving");
+  }
+
+  /**
+   * Called when the ball stops moving
+   */
+  onStopMoving() {
+    print(`Stopped moving at ${GameBase.GetTime()}`);
   }
 
   /**
@@ -123,8 +180,8 @@ class BallEntity {
    */
   updateArrowModel() {
     const hasTarget = (this.aimTarget !== null);
-    this.arrowHead.visible = hasTarget;
-    if (!hasTarget) {
+    this.arrowHead.visible = hasTarget && !this.isMoving;
+    if (!this.arrowHead.visible) {
       return;
     }
     const dir = this.aimTarget.subtract(this.position);
