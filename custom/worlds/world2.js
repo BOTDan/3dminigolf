@@ -17,6 +17,9 @@ class World2 extends World {
     const levelPhys = ModelCache.newModel("MINIGOLF_Altitude_Hole10");
     levelPhys.position = level.position;
     this.addPhysicsModel(levelPhys);
+
+    const testTrigger = new CubeTrigger(new Vector(0, 0, 0), new Vector(1, 1, 1));
+    this.addPhysicsTrigger(testTrigger);
   }
 
   draw() {
