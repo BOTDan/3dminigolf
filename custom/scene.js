@@ -199,6 +199,49 @@ class Scene {
   }
 
   /**
+   * Draws a cube in 3D space to the screen
+   * @param {Vector} point1 Top corner of the cube
+   * @param {Vector} point2 Bottom corner of the cube
+   * @param {Number} width The width of the lines
+   * @param {Boolean} clip If the lines of the cube should be clipped to the scene
+   */
+  drawCube(point1, point2, width=1, clip=true) {
+    // Convert world points to clip space
+    const points = [
+      // Top points
+      point1,
+      new Vector(point2.x, point1.y, point1.z),
+      new Vector(point2.x, point1.y, point2.z),
+      new Vector(point1.x, point1.y, point2.z),
+      // Bottom points
+      point2,
+      new Vector(point1.x, point2.y, point2.z),
+      new Vector(point1.x, point2.y, point1.z),
+      new Vector(point2.x, point2.y, point1.z),
+    ]
+    const lines = [
+      // Top
+      [points[0], points[1]],
+      [points[1], points[2]],
+      [points[2], points[3]],
+      [points[3], points[0]],
+      // Bottom
+      [points[4], points[5]],
+      [points[5], points[6]],
+      [points[6], points[7]],
+      [points[7], points[4]],
+      // Sides
+      [points[0], points[6]],
+      [points[1], points[7]],
+      [points[2], points[4]],
+      [points[3], points[5]]
+    ]
+    lines.forEach(line => {
+      this.drawLine(line[0], line[1], width, clip);
+    });
+  }
+
+  /**
    * Converts a point on the screen to a look direction
    * @param {Number} x The screen x coord
    * @param {Number} y The screen y coord
