@@ -973,7 +973,11 @@ class CubeTrigger extends PhysicsTrigger {
   }
 
   debugDraw(scene) {
-    _r.color(1, 1, 0, 1);
+    if (this.isBallInside) {
+      _r.color(1, 0.5, 0, 1);
+    } else {
+      _r.color(1, 0.5, 0, 0.5);
+    }
     scene.drawCube(this.aabb.min, this.aabb.max);
   }
 }
