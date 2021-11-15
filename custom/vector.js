@@ -312,4 +312,16 @@ class Vector {
             Math.max(this.z, value.z)
         );
     }
+
+    /**
+     * Returns a new vector with absolute values of x, y, and z
+     * @returns {Vector} A vector whose components are all positive/0
+     */
+    positive() {
+        return new Vector(
+            Math.abs(this.x),
+            Math.abs(this.y),
+            Math.abs(this.z)
+        );
+    }
 }

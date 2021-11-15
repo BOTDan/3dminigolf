@@ -8,11 +8,13 @@ class PhysicsWorld {
    */
   constructor() {
     this.colliders = [];
+    this.triggers = [];
     this.gravityDirection = new Vector(0, -1, 0);
     this.gravityStrength = 7;
     this.timescale = 1;
     this.paused = false;
     this.drawColliders = false;
+    this.drawTriggers = true;
     this.drawTrail = true;
     this._drawOps = [];
   }
@@ -49,6 +51,11 @@ class PhysicsWorld {
     collider.ball = this.ball;
   }
 
+  addTrigger(trigger) {
+    this.triggers.push(trigger);
+    trigger.ball = this.ball;
+  }
+
   /**
    * Think function to make physics work
    * @param {Number} dt deltaTime, or the time in seconds since the last think
@@ -71,6 +78,9 @@ class PhysicsWorld {
     const oldPosition = this.ball.position;
     this.ball.position = this.ball.position.add(remainingVelocity);
     this.addDebugDraw(new PhysicsDrawLine(oldPosition, this.ball.position));
+    // Calculate triggers
+    this.ball.updateStaticAABB();
+    this.processTriggers();
   }
 
   /**
@@ -127,6 +137,7 @@ class PhysicsWorld {
     this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -friction.x);
     this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -friction.y);
     this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -friction.z);
+    this.ball.updateStaticAABB();
   }
 
   /**
@@ -154,6 +165,15 @@ class PhysicsWorld {
   }
 
   /**
+   * Checks if the ball is colliding with any triggers
+   */
+  processTriggers() {
+    this.triggers.forEach((trigger) => {
+      trigger.calcTrigger();
+    });
+  }
+
+  /**
    * Adds a physics debug draw 
    * @param {PhysicsDraw} op The draw to add
    */
@@ -169,6 +189,11 @@ class PhysicsWorld {
     if (this.drawColliders) {
       this.colliders.forEach((collider) => {
         collider.debugDraw(scene);
+      });
+    }
+    if (this.drawTriggers) {
+      this.triggers.forEach((trigger) => {
+        trigger.debugDraw(scene);
       });
     }
     if (this.drawTrail) {
@@ -318,6 +343,12 @@ class PhysicsBall {
     }
     return this._aabb;
   }
+  get staticAABB() {
+    if (!this._staticAABB) {
+      this._staticAABB = this.calcStaticAABB();
+    }
+    return this._staticAABB;
+  }
 
   set position(value) { this._position = value; }
   set pos(value) { this.position = value; }
@@ -338,11 +369,29 @@ class PhysicsBall {
   }
 
   /**
+   * Returns the AABB for the ball if static at this moment
+   * @returns {min: Vector, max: Vector} The min and max of the AABB for the ball if stationary
+   */
+  calcStaticAABB() {
+    return {
+      min: this.position.min(this.position.subtract(this.radius)),
+      max: this.position.max(this.position.add(this.radius)),
+    }
+  }
+
+  /**
    * Updates the AABB for the balls movement
    * @param {Number} dt deltaTime
    */
   updateAABB(dt=1) {
     this._aabb = this.calcAABB(dt);
+  }
+
+  /**
+   * Updates the AABB for the ball if considered static
+   */
+  updateStaticAABB() {
+    this._staticAABB = this.calcStaticAABB();
   }
 
   /**
@@ -789,4 +838,146 @@ function lineIntersectCircle(lineStart, lineEnd, radius) {
     results.push(t-k);
   }
   return results;
+}
+
+/**
+ * @class
+ * @classdesc A generic trigger. Should be extended.
+ */
+class PhysicsTrigger {
+  get ball() { return this._ball; }
+  get isBallInside() { return this._isBallInside; }
+  get aabb() {
+    if (!this._aabb) {
+      this._aabb = this.calcAABB();
+    }
+    return this._aabb;
+  }
+
+  set ball(value) {
+    this._ball = value;
+    this.onBallUpdated();
+  }
+  set isBallInside(boolean) {
+    const oldValue = this.isBallInside;
+    this._isBallInside = boolean;
+    if (oldValue !== boolean) {
+      if (boolean) {
+        this.onBallEnter();
+      } else {
+        this.onBallLeave();
+      }
+    }
+  }
+
+  /**
+   * Creates a new physics trigger
+   */
+  constructor() {
+    // Do nothing
+  }
+
+  /**
+   * OVERWRITE: Called when the ball is changed for this trigger
+   */
+  onBallUpdated() {
+    return;
+  }
+
+  /**
+   * OVERWRITE: Called when the ba;; enters the trigger
+   */
+  onBallEnter() {
+    return;
+  }
+
+  /**
+   * OVERWRITE: Called when the ball leaves the trigger
+   */
+  onBallLeave() {
+    return;
+  }
+
+  /**
+   * OVERWRITE: Called every frame the ball is in the trigger
+   */
+  onBallInside() {
+    return;
+  }
+
+  /**
+   * Works out of this ball is colliding with the trigger
+   */
+  calcTrigger() {
+    return;
+  }
+
+  /**
+   * Returns an axis-aligned bounding box for this trigger
+   * @returns {min: Vector, max: Vector} The min and max point of the AABB
+   */
+  calcAABB() {
+    return {
+      min: new Vector(-Infinity, -Infinity, -Infinity),
+      max: new Vector(Infinity, Infinity, Infinity),
+    };
+  }
+
+  /**
+   * OVERWRITE: Debug draw function
+   * @param {Scene} scene A scene object for 3D rendering
+   */
+  debugDraw(scene) {
+    return;
+  }
+}
+
+/**
+ * @class
+ * @classdesc An axis-aligned cube collider
+ */
+class CubeTrigger extends PhysicsTrigger {
+  /**
+   * Creates an axis-aligned cube trigger
+   * @param {Vector} pos The center of the cube
+   * @param {Vector} size The size of the cube
+   */
+  constructor(pos, size=new Vector(1, 1, 1)) {
+    super();
+    this.position = pos;
+    this.size = size;
+  }
+
+  get position() { return this._position; }
+  get pos() { return this.position; }
+  get size() { return this._size; }
+
+  set position(value) { this._position = value; }
+  set pos(value) { this.position = value; }
+  set size(value) { this._size = value; }
+
+  calcAABB() {
+    return {
+      min: this.position.subtract(this.size.positive()),
+      max: this.position.add(this.size.positive())
+    };
+  }
+
+  calcTrigger() {
+    if (util.checkOverlapAABB(this.ball.staticAABB, this.aabb)) {
+      this.isBallInside = true;
+      this.onBallInside();
+    } else {
+      this.isBallInside = false;
+    }
+  }
+
+  debugDraw(scene) {
+    if (this.isBallInside) {
+      _r.color(1, 0.5, 0, 1);
+    } else {
+      _r.color(1, 0.5, 0, 0.5);
+    }
+    scene.drawCube(this.aabb.min, this.aabb.max);
+  }
 }
