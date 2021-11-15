@@ -974,9 +974,6 @@ class CubeTrigger extends PhysicsTrigger {
 
   debugDraw(scene) {
     _r.color(1, 1, 0, 1);
-    scene.drawPoint(this.position);
     scene.drawCube(this.aabb.min, this.aabb.max);
-    _r.color(1, 0, 0, 1);
-    scene.drawCube(this.ball.staticAABB.min, this.ball.staticAABB.max);
   }
 }
