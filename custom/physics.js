@@ -138,6 +138,23 @@ class PhysicsWorld {
     this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -friction.y);
     this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -friction.z);
     this.ball.updateStaticAABB();
+    // Prevent ball jitter when stationary
+    // TODO: This should be part of restitution really
+    const gravDir = this.gravityDirection;
+    const ballDir = this.ball.velocity.normalize();
+    if (gravDir.dot(ballDir) === -1) {
+      // Ball is moving perfectly against gravity.
+      const ballSpeed = this.ball.velocity.length()
+      if (ballSpeed < 0.1) {
+        this.ball.velocity = new Vector(0, 0, 0);
+      } else {
+        // TODO: Make this work
+        const amount = this.gravityDirection.multiply(this.gravityStrength).multiply(0.02);
+        this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -amount.x);
+        this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -amount.y);
+        this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -amount.z);
+      }
+    }
   }
 
   /**
