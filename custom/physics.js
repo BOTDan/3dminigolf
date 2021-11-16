@@ -1027,17 +1027,19 @@ class PlaneTrigger extends PhysicsTrigger {
   }
 
   debugDraw(scene) {
-    // Draw the initial plane points
-    _r.color(1, 1, 1, 1);
-    scene.drawLine(this.position, this.position.add(this.normal));
-    scene.drawPoint(this.position, 10);
-    // Debug
+    if (this.isBallInside) {
+      _r.color(1, 0.5, 0, 1);
+    } else {
+      _r.color(1, 0.5, 0, 0.5);
+    }
     const ang = this.normal.asAngle();
-    _r.color(1, 0, 0, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getForward().multiply(1 / 2)));
-    _r.color(0, 1, 0, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getUp().multiply(1 / 2)));
-    _r.color(0, 0, 1, 0.5);
-    scene.drawLine(this.position, this.position.add(ang.getRight().multiply(1 / 2)));
+    scene.drawLine(this.position.subtract(ang.getRight()), this.position.add(ang.getRight()));
+    scene.drawLine(this.position.subtract(ang.getUp()), this.position.add(ang.getUp()));
+    // Draw an arrow for the normal
+    const endPoint = this.position.add(ang.getForward().multiply(0.25))
+    const endPointBack = endPoint.subtract(ang.getForward().multiply(0.1));
+    scene.drawLine(this.position, endPoint);
+    scene.drawLine(endPoint, endPointBack.add(ang.getRight().multiply(0.1)));
+    scene.drawLine(endPoint, endPointBack.add(ang.getRight().multiply(-0.1)));
   }
 }
