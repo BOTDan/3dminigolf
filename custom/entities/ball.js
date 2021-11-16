@@ -33,6 +33,7 @@ class BallEntity {
     this._isMoving = false;
     this._isStationary = true; // Internal
     this._lastStationaryAt = GameBase.GetTime(); // Internal
+    this.lastStationaryPos = this.position;
   }
 
   get scene() { return this._scene; }
@@ -59,6 +60,7 @@ class BallEntity {
   }
   get arrowHead() { return this._arrowHead; }
   get isMoving() { return this._isMoving; }
+  get lastStationaryPos() { return this._lastStattionaryPos; }
 
   set position(vector) {
     this.physics.position = vector;
@@ -100,9 +102,13 @@ class BallEntity {
       if (boolean) {
         this.onStartMoving();
       } else {
+        this.lastStationaryPos = this.position;
         this.onStopMoving();
       }
     }
+  }
+  set lastStationaryPos(vector) {
+    this._lastStattionaryPos = vector;
   }
 
   think(dt) {
