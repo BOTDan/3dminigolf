@@ -20,6 +20,13 @@ class World2 extends World {
 
     const testTrigger = new CubeTrigger(new Vector(0, 0, 0), new Vector(1, 1, 1));
     this.addPhysicsTrigger(testTrigger);
+
+    const planeTrigger = new PlaneTrigger(new Vector(0, -2, 0), new Vector(0, -1, 0));
+    planeTrigger.onBallEnter = () => {
+      this.ball.velocity = new Vector(0, 0, 0);
+      this.ball.position = this.ball.lastStationaryPos;
+    }
+    this.addPhysicsTrigger(planeTrigger);
   }
 
   draw() {
