@@ -31,8 +31,8 @@ class BallEntity {
     this.aimTargetMaxVelocity = 8;
 
     this._isMoving = false;
-    this._isStationary = true;
-    this._lastStationaryAt = GameBase.GetTime();
+    this._isStationary = true; // Internal
+    this._lastStationaryAt = GameBase.GetTime(); // Internal
   }
 
   get scene() { return this._scene; }
@@ -133,23 +133,20 @@ class BallEntity {
       this._isStationary = false;
       this.isMoving = true;
     }
-    if (this.isMoving) {
-      print(this.physics.velocity.length())
-    }
   }
 
   /**
    * Called when the ball starts moving
    */
   onStartMoving() {
-    print("Started moving");
+    return;
   }
 
   /**
    * Called when the ball stops moving
    */
   onStopMoving() {
-    print(`Stopped moving at ${GameBase.GetTime()}`);
+    return;
   }
 
   /**
