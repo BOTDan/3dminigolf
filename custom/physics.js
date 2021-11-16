@@ -981,3 +981,63 @@ class CubeTrigger extends PhysicsTrigger {
     scene.drawCube(this.aabb.min, this.aabb.max);
   }
 }
+
+class PlaneTrigger extends PhysicsTrigger {
+  /**
+   * Creates a plane as a trigger
+   * @param {Vector} pos The position of the plane
+   * @param {Vector} normal The normal of the plane
+   * @param {Boolean} flipNormal If the normal should be flipped
+   */
+  constructor(pos, normal, flipNormal = false) {
+    super();
+    this.position = pos;
+    this.flipNormal = flipNormal;
+    this.normal = flipNormal ? normal.invert() : normal;
+  }
+
+  get position() { return this._position; }
+  get pos() { return this.position; }
+  get normal() { return this._normal; }
+  get flipNormal() { return this._flipNormal; }
+
+  set position(value) { this._position = value; }
+  set pos(value) { this.position = value; }
+  set normal(value) { this._normal = value; }
+  set flipNormal(value) { this._flipNormal = value; }
+
+  calcAABB() {
+    return {
+      min: new Vector(-Infinity, -Infinity, -Infinity),
+      max: new Vector(Infinity, Infinity, Infinity),
+    };
+  }
+
+  calcTrigger() {
+    // Don't need to do AABB check, as AABB is always infinate
+    const ballPos = this.ball.position;
+    const dir = ballPos.subtract(this.position);
+    const amount = this.normal.dot(dir);
+    if (amount > 0) {
+      this.isBallInside = true;
+      this.onBallInside();
+    } else {
+      this.isBallInside = false;
+    }
+  }
+
+  debugDraw(scene) {
+    // Draw the initial plane points
+    _r.color(1, 1, 1, 1);
+    scene.drawLine(this.position, this.position.add(this.normal));
+    scene.drawPoint(this.position, 10);
+    // Debug
+    const ang = this.normal.asAngle();
+    _r.color(1, 0, 0, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getForward().multiply(1 / 2)));
+    _r.color(0, 1, 0, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getUp().multiply(1 / 2)));
+    _r.color(0, 0, 1, 0.5);
+    scene.drawLine(this.position, this.position.add(ang.getRight().multiply(1 / 2)));
+  }
+}
