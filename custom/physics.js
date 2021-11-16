@@ -209,6 +209,9 @@ class PhysicsWorld {
         return true;
       });
     }
+    // Debug
+    GameBase.Debug.AddOverlay(`Ball Pos: ${this.ball.position}`);
+    GameBase.Debug.AddOverlay(`Ball Vel: ${this.ball.velocity.length()}`);
   }
 }
 
