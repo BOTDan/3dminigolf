@@ -16,6 +16,7 @@ class PhysicsWorld {
     this.drawColliders = false;
     this.drawTriggers = true;
     this.drawTrail = true;
+    this.drawAABB = false;
     this._drawOps = [];
   }
 
@@ -27,6 +28,7 @@ class PhysicsWorld {
   get ball() { return this._ball; }
   get drawColliders() { return this._drawColliders; }
   get drawTrail() { return this._drawTrail; }
+  get drawAABB() { return this._drawAABB; }
 
   set colliders(value) { this._colliders = value; }
   set gravityDirection(value) { this._gravityDirection = value; }
@@ -41,6 +43,7 @@ class PhysicsWorld {
   }
   set drawColliders(value) { this._drawColliders = value; }
   set drawTrail(value) { this._drawTrail = value; }
+  set drawAABB(value) { this._drawAABB = value; }
   
   /**
    * Adds a physics collider to the world
@@ -210,6 +213,12 @@ class PhysicsWorld {
     if (this.drawTriggers) {
       this.triggers.forEach((trigger) => {
         trigger.debugDraw(scene);
+      });
+    }
+    if (this.drawAABB) {
+      this.colliders.forEach((collider) => {
+        _r.color(0, 1, 0, 1);
+        scene.drawCube(collider.aabb.min, collider.aabb.max);
       });
     }
     if (this.drawTrail) {
