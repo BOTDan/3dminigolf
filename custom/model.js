@@ -184,4 +184,26 @@ class Model {
     const amountUp = (1 + amount) / 2;
     return [amountUp, amountUp, amountUp, 1];
   }
+
+  /**
+   * Returns a function to calculate flat coloured lighting for a given triangle
+   * @param {Colour} max The colour to use as brightest
+   * @returns {Function} A function to use to calculate lighting
+   */
+  static flatColourLighting(max, min=[0,0,0]) {
+    return (triangle) => {
+      const normal = util.findNormal(triangle.worldVerts).invert();
+      const amount = normal.dot(new Vector(-1, -5, -1).normalize());
+      const amountUp = (1 + amount) / 2;
+      const r = (max[0]-min[0]) * amountUp;
+      const g = (max[1] - min[1]) * amountUp;
+      const b = (max[2] - min[2]) * amountUp;
+      return [
+        min[0]+r,
+        min[1]+g,
+        min[2]+b,
+        1
+      ];
+    }
+  }
 }
