@@ -112,6 +112,7 @@ class World {
     _r.layer++;
     this.scene.draw();
     this.physics.draw(this.scene);
+    GameBase.Debug.AddOverlay(`Ball Hits: ${this.ball.hits}`);
   }
 
   /**
