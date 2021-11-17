@@ -36,6 +36,7 @@ class BallEntity {
     this.lastStationaryPos = this.position;
 
     this.hits = 0;
+    this.isPotted = false;
   }
 
   get scene() { return this._scene; }
@@ -64,6 +65,7 @@ class BallEntity {
   get isMoving() { return this._isMoving; }
   get lastStationaryPos() { return this._lastStattionaryPos; }
   get hits() { return this._hits; }
+  get isPotted() { return this._potted; }
 
   set position(vector) {
     this.physics.position = vector;
@@ -115,6 +117,9 @@ class BallEntity {
   }
   set hits(number) {
     this._hits = number;
+  }
+  set isPotted(boolean) {
+    this._potted = boolean;
   }
 
   think(dt) {
@@ -189,7 +194,7 @@ class BallEntity {
    */
   updateArrowModel() {
     const hasTarget = (this.aimTarget !== null);
-    this.arrowHead.visible = hasTarget && !this.isMoving;
+    this.arrowHead.visible = hasTarget && !this.isMoving && !this.isPotted;
     if (!this.arrowHead.visible) {
       return;
     }
@@ -239,5 +244,21 @@ class BallEntity {
       this.velocity = this.velocity.add(this.aimTargetVelocity);
       this.hits++;
     }
+  }
+
+  /**
+   * Restes the ball to its last known location
+   */
+  outOfBounds() {
+    this.velocity = new Vector(0, 0, 0);
+    this.position = this.lastStationaryPos;
+  }
+
+  /**
+   * Pots the ball (finishes the level)
+   */
+  pot() {
+    this.isPotted = true;
+    print("Ball Potted");
   }
 }
