@@ -99,5 +99,22 @@ const util = {
     const zOverlap = (a.max.z >= b.min.z && b.max.z >= a.min.z);
     const result = (xOverlap && yOverlap && zOverlap);
     return result;
+  },
+
+  /**
+   * Converts an RGB(A) colour to normalised colour
+   * @param {Number} r Red value
+   * @param {Number} g Green value
+   * @param {Number} b Blue value
+   * @param {Number} a Alpha value
+   * @returns {number[]} A colour object with values from 0-1
+   */
+  RGBtoColour(r, g, b, a=255) {
+    return [
+      r/255,
+      g/255,
+      b/255,
+      a/255
+    ];
   }
 }
