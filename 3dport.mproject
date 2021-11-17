@@ -39,6 +39,7 @@
 		"2_plyparser": "custom/plyparser.js",
 		"2_physics": "custom/physics.js",
 		"3_models": "custom/models/mingolf_models.js",
+		"3_models_towerunite": "custom/models/models_towerunite.js",
 		"4_entities_ball": "custom/entities/ball.js",
 		"4_worlds_world1": "custom/worlds/world1.js",
 		"4_worlds_world2": "custom/worlds/world2.js",
