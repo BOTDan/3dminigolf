@@ -144,15 +144,14 @@ class PhysicsWorld {
     const ballDir = this.ball.velocity.normalize();
     if (gravDir.dot(ballDir) === -1) {
       // Ball is moving perfectly against gravity.
+      // TODO: Make this work
+      const amount = this.gravityDirection.multiply(this.gravityStrength).multiply(0.02);
+      this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -amount.x);
+      this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -amount.y);
+      this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -amount.z);
       const ballSpeed = this.ball.velocity.length()
       if (ballSpeed < 0.1) {
         this.ball.velocity = new Vector(0, 0, 0);
-      } else {
-        // TODO: Make this work
-        const amount = this.gravityDirection.multiply(this.gravityStrength).multiply(0.02);
-        this.ball.velocity.x = clampedSubtract(this.ball.velocity.x, -amount.x);
-        this.ball.velocity.y = clampedSubtract(this.ball.velocity.y, -amount.y);
-        this.ball.velocity.z = clampedSubtract(this.ball.velocity.z, -amount.z);
       }
     }
   }
