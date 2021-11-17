@@ -19,8 +19,8 @@ class BallEntity {
 
     this.model.calcColour = Model.flatLighting;
 
-    this.cameraAttached = false;
-    this.cameraAngle = new Angle(0, 0, 0);
+    this.cameraAttached = true;
+    this.cameraAngle = new Angle(20, 0, 0);
     this.cameraDistance = 1;
     
     this.scene.addModel(this.model);
