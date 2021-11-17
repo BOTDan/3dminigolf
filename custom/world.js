@@ -18,12 +18,14 @@ class World {
   }
 
   get name() { return this._name; }
+  get par() { return this._par; }
   get scene() { return this._scene; }
   get physics() { return this._physics; }
   get ball() { return this._ball; }
   get camera() { return this.scene.camera; }
 
   set name(string) { this._name = string; }
+  set par(number) { this._par = number; }
 
   /**
    * Adds the given model(s) to the world
