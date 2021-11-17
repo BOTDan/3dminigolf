@@ -10,9 +10,15 @@ class Vector {
      * @param {Number} z The z co-ordinate
      */
     constructor(x, y, z) {
-        this.x = x || 0;
-        this.y = y || 0;
-        this.z = z || 0;
+        if (y === undefined && z == undefined) {
+            this.x = x || 0;
+            this.y = this.x;
+            this.z = this.x;
+        } else {
+            this.x = x || 0;
+            this.y = y || 0;
+            this.z = z || 0;
+        }
     }
 
     get x() { return this._x; }
