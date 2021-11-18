@@ -172,10 +172,10 @@ class Triangle {
       const uv3 = this.uvs[2] || new Vector();
       _r.color(...colour);
       _r.quad(
-        point1.x, point1.y, uv1.x, uv1.y,
-        point2.x, point2.y, uv2.x, uv2.y,
-        point3.x, point3.y, uv3.x, uv3.y,
-        point3.x, point3.y, uv3.x, uv3.y,
+        point1.x, point1.y, uv1.x, 1-uv1.y,
+        point2.x, point2.y, uv2.x, 1-uv2.y,
+        point3.x, point3.y, uv3.x, 1-uv3.y,
+        point3.x, point3.y, uv3.x, 1-uv3.y,
         this.texture
       );
     }
