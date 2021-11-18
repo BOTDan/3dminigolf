@@ -29,22 +29,9 @@ class World3 extends World {
     phys.scale = ground.scale;
     this.addPhysicsModel(phys);
 
-    const sign = ModelCache.newModel("TOWERUNITE_Altitude_Sign");
-    sign.position = new Vector(0, -0.5, 12.1);
-    sign.rotation = new Angle(-110, 0, 0);
-    sign.scale = new Vector(1.5);
-    sign.texture = assets["altitude_sign.tex"];
-    this.addModel(sign);
-
-    const signPhys = ModelCache.newModel("TOWERUNITE_Altitude_Sign");
-    signPhys.position = sign.position;
-    signPhys.rotation = sign.rotation;
-    signPhys.scale = sign.scale;
-    this.addPhysicsModel(signPhys);
-
     const hole = new HoleEntity(this, new Vector(-0.01, -0.929, -0.9783), 0.32);
 
-    const killPlane = new PlaneTrigger(new Vector(0, -3, 0), new Vector(0, -1, 0));
+    const killPlane = new PlaneTrigger(new Vector(0, -2, 0), new Vector(0, -1, 0));
     killPlane.onBallEnter = () => {
       this.ball.outOfBounds();
     }
