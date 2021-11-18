@@ -14,7 +14,6 @@ class World2 extends World {
     ground.rotation = new Angle(0, -90, 0);
     ground.scale = new Vector(0.325);
     ground.calcColour = Model.flatColourLighting(util.RGBtoColour(44, 201, 16));
-    // level.texture = assets["snake_texture_2.tex"];
     this.addModel(ground);
 
     const rail = ModelCache.newModel("TOWERUNITE_Altitude_10_Rail");
@@ -22,7 +21,6 @@ class World2 extends World {
     rail.rotation = ground.rotation;
     rail.scale = ground.scale;
     rail.calcColour = Model.flatColourLighting(util.RGBtoColour(255, 255, 255), util.RGBtoColour(50, 50, 50));
-    // level.texture = assets["snake_texture_2.tex"];
     this.addModel(rail);
 
     const phys = ModelCache.newModel("TOWERUNITE_Altitude_10_Phys");
@@ -30,6 +28,19 @@ class World2 extends World {
     phys.rotation = ground.rotation;
     phys.scale = ground.scale;
     this.addPhysicsModel(phys);
+
+    const sign = ModelCache.newModel("TOWERUNITE_Altitude_Sign");
+    sign.position = new Vector(0, -0.5, 12.1);
+    sign.rotation = new Angle(-110, 0, 0);
+    sign.scale = new Vector(1.5);
+    sign.texture = assets["altitude_sign.tex"];
+    this.addModel(sign);
+
+    const signPhys = ModelCache.newModel("TOWERUNITE_Altitude_Sign");
+    signPhys.position = sign.position;
+    signPhys.rotation = sign.rotation;
+    signPhys.scale = sign.scale;
+    this.addPhysicsModel(signPhys);
 
     const hole = new HoleEntity(this, new Vector(0, -1.679, 9.991), 0.32);
 
