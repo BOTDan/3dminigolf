@@ -6,8 +6,9 @@ class World3 extends World {
   init() {
     super.init();
 
-    this.ball.radius = 0.025;
+    this.par = 2;
 
+    this.ball.radius = 0.025;
 
     const ground = ModelCache.newModel("TOWERUNITE_Altitude_4_Ground");
     ground.position = new Vector(0, -0.019, 0.65);

@@ -13,6 +13,8 @@ class World {
     this._ball = new BallEntity(this.scene, new Vector(), 0.04);
     this.physics.ball = this.ball.physics;
 
+    this.par = 0;
+
     this.init();
     this.start();
   }
