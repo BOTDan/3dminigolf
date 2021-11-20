@@ -97,6 +97,13 @@ class World {
     );
   }
 
+  drawHUD() {
+    const shotCount = this.ball.isMoving
+      ? this.ball.hits
+      : this.ball.hits + 1;
+    hud.drawHoleInfo(1, this.par, shotCount);
+  }
+
   /**
    * Think hook. Called at regular intervals to handle physics etc.
    * @param {Number} dt deltaTime
@@ -114,6 +121,7 @@ class World {
     _r.layer++;
     this.scene.draw();
     this.physics.draw(this.scene);
+    this.drawHUD();
     GameBase.Debug.AddOverlay(`Ball Hits: ${this.ball.hits}`);
   }
 

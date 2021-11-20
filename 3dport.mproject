@@ -36,6 +36,7 @@
 		"1_draw": "custom/draw.js",
 		"1_scene": "custom/scene.js",
 		"1_world": "custom/world.js",
+		"1_hud": "custom/hud.js",
 		"2_plyparser": "custom/plyparser.js",
 		"2_physics": "custom/physics.js",
 		"3_models": "custom/models/mingolf_models.js",
@@ -62,7 +63,9 @@
 		"snake_texture_2": "custom/textures/snake_texture_2.png -wrap-x -wrap-y",
 		"skytexture_blue": "custom/textures/skysphere_blue.png -wrap-x -wrap-y",
 		"skytexture_clouds": "custom/textures/skytexture_clouds.png -wrap-x -wrap-y -smooth",
-		"altitude_sign": "custom/textures/altitude_sign.png -smooth"
+		"altitude_sign": "custom/textures/altitude_sign.png -smooth",
+		"hud_info_background": "custom/textures/ui/hud_info_background.png -smooth",
+		"font_hud_numbers": "custom/textures/ui/font_hud_numbers.png -smooth"
 	},
 	"sounds": {
 
